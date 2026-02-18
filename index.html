@@ -64,14 +64,20 @@
     }
     .search-box:focus { outline: none; border-color: #aaa; }
     
+
     #clearSearch {
       position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
       font-size: 16px; color: #bbb; cursor: pointer;
       width: 24px; height: 24px; line-height: 24px; text-align: center;
       border-radius: 50%; background: #f0f0f0; 
-      display: none; font-weight: bold;
+  
+      display: none; 
+      
+      font-weight: bold; z-index: 11;
     }
     #clearSearch:hover { background: #ddd; color: #555; }
+
+    /* ... css อื่นๆ ... */
 
     /* Custom Dropdown */
     .suggestions-list {
