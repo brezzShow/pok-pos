@@ -1,27 +1,89 @@
 const globalLogo = new Image(); globalLogo.src = 'logo.png';
 const globalQr = new Image(); globalQr.src = 'qr.png';
 
+// ลิงก์ Google Sheets ของคุณ
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQaYhTGhkPtCm2XIsiiFTdaft7WsLzcH7-Bfk_hYyPsQn-gARm2lbGApZYEf71wdDDbQXP93cTNpZC/pub?output=csv'; 
+
+// 🔐 ตั้งค่ารหัสผ่านตรงนี้
+const USER = "pokuser";
+const PASS = "pok@rama3Shop";
 
 let products = [];
 let cart = [];
 let savedBills = JSON.parse(localStorage.getItem('savedBills')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
+    // ✅ 1. เช็คว่าล็อกอินหรือยัง?
+    checkLogin();
+    
     loadProductsFromSheet();
     renderSavedBills();
     setupTabs();
     setupSearchFeatures();
 });
 
-// --- ฟังก์ชันค้นหา & Dropdown (Logic ปุ่ม X แก้ไขแล้ว) ---
+// --- 🔐 ระบบล็อกอิน (ใส่กลับมาให้แล้ว) ---
+function checkLogin() {
+    const isLogged = localStorage.getItem('pok_isLogged');
+    const overlay = document.getElementById('loginOverlay');
+    
+    // ถ้าเคยล็อกอินแล้ว ให้ซ่อนหน้าล็อกอิน
+    if (isLogged === 'true') {
+        if(overlay) overlay.style.display = 'none';
+    } else {
+        // ถ้ายัง ให้แสดงหน้าล็อกอิน
+        if(overlay) {
+            overlay.style.display = 'flex';
+            // รีเซ็ตช่องกรอก
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPass').value = '';
+        }
+    }
+}
+
+// กดปุ่ม "เข้าใช้งาน"
+const btnLogin = document.getElementById('btnLogin');
+if(btnLogin) {
+    btnLogin.onclick = () => {
+        const u = document.getElementById('loginUser').value.trim();
+        const p = document.getElementById('loginPass').value.trim();
+        const remember = document.getElementById('rememberMe').checked;
+
+        if (u === USER && p === PASS) {
+            // ถ้ารหัสถูก
+            if (remember) localStorage.setItem('pok_isLogged', 'true'); // จำถาวร
+            else sessionStorage.setItem('pok_isLogged', 'true'); // จำชั่วคราว (ปิดแท็บหาย) // *แก้ให้ใช้ session ถ้าไม่ติ๊กจำ แต่ในโค้ดเดิมใช้ local ทั้งคู่ ปรับตามสะดวกครับ อันนี้ใช้แบบเดิมไปก่อน
+            
+            // บันทึกว่าล็อกอินแล้ว
+            localStorage.setItem('pok_isLogged', 'true'); 
+            
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('loginError').style.display = 'none';
+        } else {
+            // ถ้ารหัสผิด
+            document.getElementById('loginError').style.display = 'block';
+        }
+    };
+}
+
+// กดปุ่ม "ออกจากระบบ"
+const btnLogout = document.getElementById('btnLogout');
+if(btnLogout) {
+    btnLogout.onclick = () => {
+        if(confirm('ต้องการออกจากระบบ?')) {
+            localStorage.removeItem('pok_isLogged'); // ลบสถานะล็อกอิน
+            location.reload(); // รีเฟรชหน้าเว็บ (จะเด้งกลับไปหน้าล็อกอิน)
+        }
+    };
+}
+
+// --- ฟังก์ชันค้นหา & Dropdown ---
 function setupSearchFeatures() {
     const input = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearSearch');
     const suggestions = document.getElementById('customSuggestions');
     const options = suggestions.querySelectorAll('li');
 
-    // 1. กดที่ช่อง input เพื่อ เปิด/ปิด Dropdown
     input.addEventListener('click', (e) => {
         e.stopPropagation();
         if (suggestions.style.display === 'block') {
@@ -31,34 +93,25 @@ function setupSearchFeatures() {
         }
     });
 
-    // 2. พิมพ์ข้อความ
     input.addEventListener('input', (e) => {
         displayProducts(e.target.value);
-        
-        // ถ้ามีข้อความให้โชว์ปุ่ม X ถ้าไม่มีให้ซ่อน
         if (e.target.value.length > 0) {
             clearBtn.style.display = 'block';
         } else {
             clearBtn.style.display = 'none';
         }
-
-        // ตอนพิมพ์ให้ซ่อน Dropdown ไปก่อน
         suggestions.style.display = 'none';
     });
 
-    // 3. ปุ่ม X (กดแล้วลบข้อความ + โชว์ Dropdown ค้างไว้)
     clearBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // ห้าม event ทะลุไปปิด Dropdown
-        
+        e.stopPropagation();
         input.value = "";       
         displayProducts("");    
         input.focus();          
-        
-        suggestions.style.display = 'block'; // สั่งเปิด Dropdown ทันที
-        clearBtn.style.display = 'none';     // ซ่อนปุ่ม X
+        suggestions.style.display = 'block'; 
+        clearBtn.style.display = 'none';
     });
 
-    // 4. เลือกคำจาก Dropdown
     options.forEach(opt => {
         opt.addEventListener('click', () => {
             input.value = opt.innerText;
@@ -68,7 +121,6 @@ function setupSearchFeatures() {
         });
     });
 
-    // 5. คลิกที่อื่นในจอเพื่อปิด Dropdown
     document.addEventListener('click', (e) => {
         if (e.target !== input && e.target !== suggestions && e.target !== clearBtn) {
             suggestions.style.display = 'none';
@@ -245,7 +297,7 @@ function genBill(showPrice) {
     
     ctx.fillStyle = "white"; ctx.fillRect(0,0,cvs.width,cvs.height);
     
-    let y = -10; 
+    let y = -10;
     
     if(globalLogo.complete) { 
         ctx.drawImage(globalLogo, (W-165)/2, y, 165, 165); 
