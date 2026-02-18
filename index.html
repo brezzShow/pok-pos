@@ -15,7 +15,7 @@
       overflow: hidden; 
     }
 
-    /* --- หน้า Login (ปรับปรุง) --- */
+    /* --- หน้า Login --- */
     #loginOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.9);
@@ -38,96 +38,111 @@
     .btn-login {
       width: 100%; padding: 14px; background: #007bff; color: white;
       border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
-      margin-top: 15px; box-shadow: 0 4px 6px rgba(0,123,255,0.3);
+      margin-top: 15px;
     }
-    .btn-login:active { transform: scale(0.98); }
-    /* ✅ Checkbox ชิดซ้าย */
+    /* ✅ จัดชิดซ้าย */
     .remember-me {
-      display: flex; align-items: center; justify-content: flex-start; /* ชิดซ้าย */
+      display: flex; align-items: center; justify-content: flex-start; 
       margin-top: 10px; font-size: 14px; color: #666; cursor: pointer;
-      width: 100%; /* เต็มความกว้าง */
+      width: 100%;
     }
     .remember-me input { margin-right: 8px; width: 18px; height: 18px; }
 
-    /* --- ปุ่ม Logout (อิโมจิ) --- */
+    /* --- ปุ่ม Logout --- */
     .btn-logout {
-      background: #dc3545; color: white; border: none; border-radius: 50%; /* กลม */
-      width: 35px; height: 35px; font-size: 18px; cursor: pointer;
-      margin-left: 8px; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      background: #dc3545; color: white; border: none; border-radius: 4px;
+      padding: 0 12px; font-size: 13px; cursor: pointer; height: 38px;
+      margin-left: 5px; font-weight: bold; flex-shrink: 0;
     }
 
-    /* --- คอนเทนเนอร์หลัก --- */
+    /* --- ช่องค้นหา & Dropdown สวยๆ --- */
+    .search-wrapper { position: relative; flex: 1; display: flex; align-items: center; }
+    .search-box { 
+      width: 100%; padding: 10px 35px 10px 10px; 
+      border: 1px solid #ccc; border-radius: 6px; font-size: 16px; 
+      background: #fff;
+    }
+    /* ✅ เอาเส้นขอบสีฟ้าออกตอนกด */
+    .search-box:focus { outline: none; border-color: #aaa; }
+    
+    /* ✅ ปุ่ม X ค้างไว้ตลอด */
+    #clearSearch {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 16px; color: #bbb; cursor: pointer;
+      width: 24px; height: 24px; line-height: 24px; text-align: center;
+      border-radius: 50%; background: #f0f0f0; 
+      display: block; /* โชว์ตลอด */
+      font-weight: bold;
+    }
+    #clearSearch:hover { background: #ddd; color: #555; }
+
+    /* ✅ Custom Dropdown */
+    .suggestions-list {
+      position: absolute; top: 100%; left: 0; width: 100%;
+      background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      list-style: none; padding: 0; margin: 0;
+      z-index: 1000; display: none; /* ซ่อนก่อน */
+      max-height: 250px; overflow-y: auto;
+    }
+    .suggestions-list li {
+      padding: 12px 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer; font-size: 15px; color: #333;
+    }
+    .suggestions-list li:hover { background: #e3f2fd; color: #007bff; }
+    .suggestions-list li:last-child { border-bottom: none; }
+
+    /* --- Layout Container --- */
     .container { 
       display: flex; height: 100%; gap: 10px; padding: 10px;
       box-sizing: border-box; overflow: hidden;
     }
 
-    /* --- ช่องค้นหา (ปรับปรุงใหม่) --- */
-    .search-wrapper { position: relative; flex: 1; display: flex; align-items: center; }
-    .search-box { 
-      width: 100%; padding: 10px 35px 10px 12px; 
-      border: 1px solid #ccc; border-radius: 20px; /* มนขึ้น */
-      font-size: 16px; background: #fff;
-    }
-    /* ✅ เอาเส้นขอบตอนคลิกออก */
-    .search-box:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.1); }
-    
-    /* ปุ่มลบ (X) */
-    #clearSearch {
-      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-      font-size: 16px; color: #fff; cursor: pointer;
-      width: 20px; height: 20px; line-height: 20px; text-align: center;
-      border-radius: 50%; background: #ccc; 
-      display: none; /* แสดงเมื่อพิมพ์ */
-    }
-    #clearSearch:hover { background: #999; }
-
-    /* ✅ ปรับแต่ง Dropdown (Datalist) */
-    /* หมายเหตุ: CSS ปรับ Datalist โดยตรงไม่ได้มาก แต่เราทำ Search Box ให้สวยขึ้นแล้ว */
-
-    /* --- Media Queries --- */
+    /* --- Media Query (คอมพิวเตอร์) --- */
     @media (min-width: 769px) { .left-panel { flex: 1.4; } .right-panel { flex: 1.1; } }
-    
-    /* --- จอมือถือ (ปรับสัดส่วน 60:40) --- */
+
+    /* --- Media Query (มือถือ - จุดแก้สัดส่วน) --- */
     @media (max-width: 768px) {
       .container { flex-direction: column; padding: 5px; gap: 5px !important; }
       
-      /* ✅ รายการสินค้า (บน) ใหญ่ขึ้น (ประมาณ 55-60%) */
+      /* ✅ สินค้า 60% */
       .left-panel { 
         flex: none; 
-        height: 58%; /* ปรับเป็น 58% เพื่อให้สมดุล */
+        height: 60%; 
         border-radius: 8px 8px 0 0 !important; border-bottom: none !important; 
       }
       
-      /* ✅ ตะกร้าสินค้า (ล่าง) เล็กลง (ประมาณ 40-45%) */
+      /* ✅ ตะกร้า 40% (ลบ gap 5px ออก) */
       .right-panel { 
         flex: none; 
-        height: calc(42% - 5px); /* ส่วนที่เหลือ */
+        height: calc(40% - 5px); 
         border-radius: 0 0 8px 8px !important; border-top: 1px solid #ddd !important; 
       }
       
-      .cart-items { flex: 1; }
-      .btn-qty, .btn-trash { width: 30px; height: 30px; font-size: 14px; } /* ลดขนาดปุ่ม */
+      .cart-items { flex: 1; min-height: 0; } /* สำคัญ: ให้รายการยืดหดได้ในพื้นที่จำกัด */
+      .footer-section { padding-bottom: 10px !important; }
+      
+      /* ปรับขนาดฟอนต์/ปุ่มให้เล็กลงนิดนึงเพราะที่น้อยลง */
+      .btn-qty, .btn-trash { width: 30px; height: 30px; font-size: 14px; }
       .product-row { padding: 10px; font-size: 14px; }
       .cart-row { padding: 4px 0; font-size: 13px; }
       .total-price { font-size: 20px; margin-bottom: 2px; }
-      .footer-section { padding-bottom: 15px !important; }
       .btn-save-bill { padding: 8px; font-size: 13px; }
-      .btn-bill { font-size: 11px; padding: 6px; } 
-      .action-group { height: 35px; }
+      .btn-bill { font-size: 11px; padding: 8px; } 
+      .action-group { height: 38px; }
     }
 
     /* --- Common Styles --- */
     .left-panel, .right-panel { display: flex; flex-direction: column; background: white; border-radius: 8px; border: 1px solid #ddd; overflow: hidden; }
     .tabs { display: flex; background: #eee; border-bottom: 1px solid #ddd; flex-shrink: 0; }
-    .tab-btn { flex: 1; padding: 10px; border: none; font-weight: bold; color: #666; background: #eee; outline: none; }
+    .tab-btn { flex: 1; padding: 12px; border: none; font-weight: bold; color: #666; background: #eee; outline: none; }
     .tab-btn.active { background: #007bff; color: white; }
     .tab-content { flex: 1; display: none; flex-direction: column; padding: 5px; overflow: hidden; }
     .tab-content.active { display: flex; }
-    .tools-bar { display: flex; gap: 5px; margin-bottom: 5px; flex-shrink: 0; align-items: center; }
+    
+    .tools-bar { display: flex; gap: 5px; margin-bottom: 5px; flex-shrink: 0; align-items: center; z-index: 10; position: relative; }
+    
     .scroll-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; border: 1px solid #eee; }
-    .product-row { border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; padding: 10px; cursor: pointer; }
+    .product-row { border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; }
     .product-row:active { background-color: #e3f2fd; }
     .saved-bill-row { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
     .cart-header { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 2px solid #333; flex-shrink: 0; background: #fff; }
@@ -174,16 +189,19 @@
     <div id="tabProductContent" class="tab-content active">
         <div class="tools-bar">
             <div class="search-wrapper">
-                <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหา..." list="searchSuggestions">
-                <span id="clearSearch">×</span>
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหา..." autocomplete="off">
+                <span id="clearSearch">✕</span>
+                <ul id="customSuggestions" class="suggestions-list">
+                    <li>วงล้อ</li>
+                    <li>ดุม</li>
+                    <li>ซี่ลวด</li>
+                    <li>ยาง</li>
+                    <li>อื่นๆ</li>
+                    <li>เทิร์นล้อ</li>
+                    <li>ส่วนลด</li>
+                </ul>
             </div>
-            <button id="btnLogout" class="btn-logout">🚪</button>
-
-            <datalist id="searchSuggestions">
-                <option value="วงล้อ"><option value="ดุม"><option value="ซี่ลวด">
-                <option value="ยาง"><option value="อื่นๆ"><option value="เทิร์นล้อ">
-                <option value="ส่วนลด">
-            </datalist>
+            <button id="btnLogout" class="btn-logout">ออกระบบ</button>
         </div>
         <div id="itemList" class="scroll-list"></div>
     </div>
