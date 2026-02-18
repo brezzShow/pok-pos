@@ -2,18 +2,17 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>POK POS</title>
   <style>
-    /* --- พื้นฐาน (แก้เรื่องความสูงล้น) --- */
+    /* --- พื้นฐาน --- */
     html, body {
       margin: 0; padding: 0;
       background-color: #f0f2f5;
       font-family: 'Sarabun', sans-serif;
-      /* ใช้ dvh เพื่อให้พอดีจอจริงไม่รวมแถบ URL */
-      height: 100dvh; 
+      height: 100vh; 
       width: 100vw;
-      overflow: hidden; /* ห้ามสกรอลทั้งหน้า */
+      overflow: hidden; 
     }
 
     .container { 
@@ -21,47 +20,53 @@
       height: 100%; 
       padding: 10px;
       gap: 10px; 
-      box-sizing: border-box; /* คิดขอบรวมในขนาด */
+      box-sizing: border-box; 
     }
 
-    /* --- จอคอม (แนวนอน) --- */
+    /* --- จอคอม (ปกติ) --- */
     @media (min-width: 769px) {
       .left-panel { flex: 1.4; }
       .right-panel { flex: 1.1; }
-      .container { overflow: hidden; }
     }
 
-    /* --- จอมือถือ (แนวตั้ง) --- */
+    /* --- จอมือถือ (แก้ปัญหาปุ่มหาย) --- */
     @media (max-width: 768px) {
       .container { 
         flex-direction: column; 
         padding: 5px; 
-        gap: 8px; /* เว้นระยะห่างนิดหน่อย */
-        /* เพิ่ม padding ล่างเผื่อจอ iPhone รุ่นมีติ่ง */
-        padding-bottom: env(safe-area-inset-bottom, 10px); 
+        gap: 5px; 
+        
+        /* 🔥 ไม้ตาย: บังคับให้สูงไม่เต็มจอ (เว้นที่ด้านล่าง 70px เผื่อ browser bar) */
+        height: calc(100dvh - 70px) !important;
+        
+        /* ดันลงมาจากขอบบนนิดนึง */
+        margin-top: 5px;
       }
       
-      /* กล่องบน (สินค้า) - ฟิกความสูงไว้แค่นี้พอ */
+      /* กล่องบน (สินค้า) - ลดขนาดลงอีก ให้เหลือที่ข้างล่างเยอะๆ */
       .left-panel { 
-        flex: none; /* ไม่ยืด */
-        height: 40%; /* เอาไป 40% ของจอ */
+        flex: none; 
+        height: 35%; /* เหลือ 35% พอ */
         border-radius: 8px !important;
         border: 1px solid #ddd;
       }
       
-      /* กล่องล่าง (ตะกร้า) - "ใช้พื้นที่ที่เหลือทั้งหมด" */
+      /* กล่องล่าง (ตะกร้า) - ยืดให้เต็มพื้นที่ที่เหลือ */
       .right-panel { 
-        flex: 1; /* ✅ พระเอกคือตัวนี้: ยืดจนเต็มพื้นที่ที่เหลือ */
-        min-height: 0; /* สำคัญ! เพื่อให้ของข้างในสกรอลได้ */
+        flex: 1; 
+        min-height: 0; 
         border-radius: 8px !important;
         border: 1px solid #007bff;
         display: flex;
         flex-direction: column;
+        
+        /* เพิ่มขอบล่างกันเหนียวอีกชั้น */
+        padding-bottom: 5px;
       }
 
       /* ปรับแต่งภายใน */
-      .cart-items { flex: 1; overflow-y: auto; } /* รายการยืดหดได้ */
-      .footer-section { flex-shrink: 0; } /* ส่วนปุ่มห้ามหด */
+      .cart-items { flex: 1; overflow-y: auto; } 
+      .footer-section { flex-shrink: 0; } 
 
       /* ขนาดปุ่มมือถือ */
       .btn-qty, .btn-trash { width: 32px; height: 32px; font-size: 16px; }
@@ -92,7 +97,8 @@
     
     .tools-bar { display: flex; gap: 5px; margin-bottom: 5px; flex-shrink: 0; }
     .search-box { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
-    
+    .btn-csv { display: none; } /* ซ่อนปุ่ม CSV ในมือถือ */
+
     /* Lists */
     .scroll-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; border: 1px solid #eee; }
     .product-row { border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; padding: 10px; cursor: pointer; }
@@ -125,7 +131,7 @@
     /* Utilities */
     .btn-action-sm { padding: 5px 10px; border: none; border-radius: 4px; color: white; font-size: 12px; margin-left: 3px; }
     .btn-load { background: #28a745; } .btn-del { background: #dc3545; }
-    #csvInput, #billCanvas, .btn-csv { display: none; }
+    #csvInput, #billCanvas { display: none; }
   </style>
 </head>
 <body>
