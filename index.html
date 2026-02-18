@@ -40,7 +40,6 @@
       border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
       margin-top: 15px;
     }
-    /* ✅ จัดชิดซ้าย */
     .remember-me {
       display: flex; align-items: center; justify-content: flex-start; 
       margin-top: 10px; font-size: 14px; color: #666; cursor: pointer;
@@ -48,41 +47,42 @@
     }
     .remember-me input { margin-right: 8px; width: 18px; height: 18px; }
 
-    /* --- ปุ่ม Logout --- */
+    /* --- ปุ่ม Logout (ปรับขนาดให้เล็กและแคบลง) --- */
     .btn-logout {
       background: #dc3545; color: white; border: none; border-radius: 4px;
-      padding: 0 12px; font-size: 13px; cursor: pointer; height: 38px;
+      padding: 0 8px; /* ลดความกว้าง */
+      font-size: 11px; /* ลดขนาดตัวหนังสือ */
+      cursor: pointer; height: 38px;
       margin-left: 5px; font-weight: bold; flex-shrink: 0;
+      min-width: 50px; /* กำหนดความกว้างขั้นต่ำ */
     }
 
-    /* --- ช่องค้นหา & Dropdown สวยๆ --- */
+    /* --- ช่องค้นหา --- */
     .search-wrapper { position: relative; flex: 1; display: flex; align-items: center; }
     .search-box { 
       width: 100%; padding: 10px 35px 10px 10px; 
       border: 1px solid #ccc; border-radius: 6px; font-size: 16px; 
       background: #fff;
     }
-    /* ✅ เอาเส้นขอบสีฟ้าออกตอนกด */
     .search-box:focus { outline: none; border-color: #aaa; }
     
-    /* ✅ ปุ่ม X ค้างไว้ตลอด */
     #clearSearch {
       position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
       font-size: 16px; color: #bbb; cursor: pointer;
       width: 24px; height: 24px; line-height: 24px; text-align: center;
       border-radius: 50%; background: #f0f0f0; 
-      display: block; /* โชว์ตลอด */
+      display: none; /* ซ่อนไว้ก่อน ถ้าไม่มีข้อความ */
       font-weight: bold;
     }
     #clearSearch:hover { background: #ddd; color: #555; }
 
-    /* ✅ Custom Dropdown */
+    /* Custom Dropdown */
     .suggestions-list {
       position: absolute; top: 100%; left: 0; width: 100%;
       background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       list-style: none; padding: 0; margin: 0;
-      z-index: 1000; display: none; /* ซ่อนก่อน */
+      z-index: 1000; display: none;
       max-height: 250px; overflow-y: auto;
     }
     .suggestions-list li {
@@ -100,28 +100,27 @@
     /* --- Media Query (คอมพิวเตอร์) --- */
     @media (min-width: 769px) { .left-panel { flex: 1.4; } .right-panel { flex: 1.1; } }
 
-    /* --- Media Query (มือถือ - จุดแก้สัดส่วน) --- */
+    /* --- Media Query (มือถือ - แก้สัดส่วน 55:45) --- */
     @media (max-width: 768px) {
       .container { flex-direction: column; padding: 5px; gap: 5px !important; }
       
-      /* ✅ สินค้า 60% */
+      /* ✅ สินค้า 55% */
       .left-panel { 
         flex: none; 
-        height: 60%; 
+        height: 55%; 
         border-radius: 8px 8px 0 0 !important; border-bottom: none !important; 
       }
       
-      /* ✅ ตะกร้า 40% (ลบ gap 5px ออก) */
+      /* ✅ ตะกร้า 45% */
       .right-panel { 
         flex: none; 
-        height: calc(40% - 5px); 
+        height: calc(45% - 5px); 
         border-radius: 0 0 8px 8px !important; border-top: 1px solid #ddd !important; 
       }
       
-      .cart-items { flex: 1; min-height: 0; } /* สำคัญ: ให้รายการยืดหดได้ในพื้นที่จำกัด */
+      .cart-items { flex: 1; min-height: 0; }
       .footer-section { padding-bottom: 10px !important; }
       
-      /* ปรับขนาดฟอนต์/ปุ่มให้เล็กลงนิดนึงเพราะที่น้อยลง */
       .btn-qty, .btn-trash { width: 30px; height: 30px; font-size: 14px; }
       .product-row { padding: 10px; font-size: 14px; }
       .cart-row { padding: 4px 0; font-size: 13px; }
@@ -151,6 +150,7 @@
     .cart-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
     .qty-group { display: flex; align-items: center; gap: 3px; }
     .btn-qty { border: 1px solid #bbb; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+    /* ✅ ใช้ Class นี้สำหรับปุ่มถังขยะ */
     .btn-trash { background: #dc3545; color: white; border: none; border-radius: 4px; margin-left: 3px; display: flex; align-items: center; justify-content: center; }
     .footer-section { padding: 5px 8px 8px 8px; border-top: 1px solid #ddd; background: #fff; flex-shrink: 0; }
     .total-price { text-align: right; font-size: 24px; font-weight: bold; color: #28a745; margin-bottom: 5px; }
@@ -212,7 +212,7 @@
   <div class="right-panel">
     <div class="cart-header">
         <span style="font-weight:bold; font-size:16px;">🛒 ตะกร้าสินค้า</span>
-        </div>
+    </div>
     <div id="cartContents" class="cart-items"><div style="text-align:center; color:#999; margin-top:30px;">ว่างเปล่า</div></div>
     <div class="footer-section">
         <div id="totalPrice" class="total-price">0.-</div>
