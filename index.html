@@ -1,298 +1,226 @@
-const globalLogo = new Image(); globalLogo.src = 'logo.png';
-const globalQr = new Image(); globalQr.src = 'qr.png';
-
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQaYhTGhkPtCm2XIsiiFTdaft7WsLzcH7-Bfk_hYyPsQn-gARm2lbGApZYEf71wdDDbQXP93cTNpZC/pub?output=csv'; 
-
-const USER = "pokuser";
-const PASS = "pok@rama3Shop";
-
-let products = [];
-let cart = [];
-let savedBills = JSON.parse(localStorage.getItem('savedBills')) || [];
-
-document.addEventListener('DOMContentLoaded', () => {
-    checkLogin();
-    loadProductsFromSheet();
-    renderSavedBills();
-    setupTabs();
-    setupSearchFeatures();
-});
-
-// --- Login System ---
-function checkLogin() {
-    const isLogged = localStorage.getItem('pok_isLogged');
-    if (isLogged === 'true') {
-        document.getElementById('loginOverlay').style.display = 'none';
-    } else {
-        document.getElementById('loginOverlay').style.display = 'flex';
-        document.getElementById('loginUser').value = '';
-        document.getElementById('loginPass').value = '';
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>POK POS</title>
+  <style>
+    /* --- พื้นฐาน --- */
+    html, body {
+      margin: 0; padding: 0;
+      background-color: #f0f2f5;
+      font-family: 'Sarabun', sans-serif;
+      height: 100dvh; 
+      width: 100vw;
+      overflow: hidden; 
     }
-}
 
-document.getElementById('btnLogin').onclick = () => {
-    const u = document.getElementById('loginUser').value.trim();
-    const p = document.getElementById('loginPass').value.trim();
-    const remember = document.getElementById('rememberMe').checked;
-
-    if (u === USER && p === PASS) {
-        if (remember) localStorage.setItem('pok_isLogged', 'true');
-        else localStorage.removeItem('pok_isLogged');
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('loginError').style.display = 'none';
-    } else {
-        document.getElementById('loginError').style.display = 'block';
+    /* --- หน้า Login --- */
+    #loginOverlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 9999;
+      display: flex; justify-content: center; align-items: center;
+      backdrop-filter: blur(8px);
     }
-};
-
-document.getElementById('btnLogout').onclick = () => {
-    if(confirm('ต้องการออกจากระบบ?')) {
-        localStorage.removeItem('pok_isLogged');
-        location.reload();
+    .login-box {
+      background: white; padding: 30px 20px; border-radius: 16px;
+      width: 85%; max-width: 320px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      text-align: center;
     }
-};
+    .login-input {
+      width: 100%; padding: 14px; margin: 8px 0;
+      border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px;
+      background: #f9f9f9;
+    }
+    .login-input:focus { border-color: #007bff; outline: none; background: #fff; }
+    .btn-login {
+      width: 100%; padding: 14px; background: #007bff; color: white;
+      border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
+      margin-top: 15px;
+    }
+    .remember-me {
+      display: flex; align-items: center; justify-content: flex-start; 
+      margin-top: 10px; font-size: 14px; color: #666; cursor: pointer;
+      width: 100%;
+    }
+    .remember-me input { margin-right: 8px; width: 18px; height: 18px; }
 
-// --- Search Features (กดซ้ำเพื่อเก็บ Dropdown) ---
-function setupSearchFeatures() {
-    const input = document.getElementById('searchInput');
-    const clearBtn = document.getElementById('clearSearch');
-    const suggestions = document.getElementById('customSuggestions');
-    const options = suggestions.querySelectorAll('li');
+    /* --- ปุ่ม Logout --- */
+    .btn-logout {
+      background: #dc3545; color: white; border: none; border-radius: 4px;
+      padding: 0 8px; font-size: 11px; cursor: pointer; height: 38px;
+      margin-left: 5px; font-weight: bold; flex-shrink: 0;
+      min-width: 50px;
+    }
 
-    // ✅ ใช้ event 'click' แทน focus เพื่อทำระบบ Toggle
-    input.addEventListener('click', () => {
-        // ถ้าเปิดอยู่ให้ปิด ถ้าปิดอยู่ให้เปิด
-        if (suggestions.style.display === 'block') {
-            suggestions.style.display = 'none';
-        } else {
-            suggestions.style.display = 'block';
-        }
-    });
-
-    // ซ่อน Dropdown เมื่อคลิกที่อื่น
-    input.addEventListener('blur', () => {
-        setTimeout(() => { suggestions.style.display = 'none'; }, 200);
-    });
-
-    input.addEventListener('input', (e) => {
-        displayProducts(e.target.value);
-        clearBtn.style.display = e.target.value.length > 0 ? 'block' : 'none';
-    });
-
-    clearBtn.addEventListener('click', () => {
-        input.value = "";
-        displayProducts(""); 
-        input.focus(); 
-        suggestions.style.display = 'block'; // กดลบแล้วให้โชว์รายการเลือกใหม่
-        clearBtn.style.display = 'none';
-    });
-
-    options.forEach(opt => {
-        opt.addEventListener('click', () => {
-            input.value = opt.innerText;
-            displayProducts(opt.innerText);
-            suggestions.style.display = 'none';
-            clearBtn.style.display = 'block';
-        });
-    });
-}
-
-function loadProductsFromSheet() {
-    const listDiv = document.getElementById('itemList');
-    listDiv.innerHTML = "<div style='text-align:center; padding:20px; color:#666;'>⏳ กำลังโหลด...</div>";
-
-    fetch(SHEET_CSV_URL)
-    .then(r => r.text())
-    .then(csvText => {
-        const lines = csvText.split('\n');
-        products = [];
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-            const parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-            if (parts.length >= 2) {
-                let name = parts[2] ? parts[2].replace(/"/g, '').trim() : "สินค้า";
-                let price = parseFloat(parts[3] ? parts[3].replace(/,/g, '') : 0);
-                let unit = parts[6] ? parts[6].replace(/"/g, '').trim() : "ชิ้น";
-                let category = parts[0] || "";
-                if(parts[1] && parts[1].trim() !== "-" && !name.includes(parts[1])) {
-                    name = parts[1].trim() + " " + name;
-                }
-                if(name.includes("ล่องหน")) category = "invisible";
-                if(name.includes("ส่วนลด") || price < 0) category = "discount";
-                if (!isNaN(price)) products.push({ name, price, unit, category });
-            }
-        }
-        displayProducts();
-    })
-    .catch(e => {
-        listDiv.innerHTML = "<div style='text-align:center; color:red;'>❌ โหลดไม่ได้<br>เช็คเน็ต</div>";
-        const saved = localStorage.getItem('products_cache');
-        if(saved) { products = JSON.parse(saved); displayProducts(); }
-    });
-}
-
-function setupTabs() {
-    const pBtn = document.getElementById('tabProductBtn'), sBtn = document.getElementById('tabSavedBtn');
-    const pDiv = document.getElementById('tabProductContent'), sDiv = document.getElementById('tabSavedContent');
-    pBtn.onclick = () => { pBtn.classList.add('active'); sBtn.classList.remove('active'); pDiv.classList.add('active'); sDiv.classList.remove('active'); };
-    sBtn.onclick = () => { sBtn.classList.add('active'); pBtn.classList.remove('active'); sDiv.classList.add('active'); pDiv.classList.remove('active'); renderSavedBills(); };
-}
-
-function displayProducts(filterText = "") {
-    const listDiv = document.getElementById('itemList');
-    listDiv.innerHTML = "";
-    if(products.length > 0) localStorage.setItem('products_cache', JSON.stringify(products));
-
-    const terms = filterText.toLowerCase().trim().split(/\s+/);
-    const filtered = products.filter(p => {
-        if (p.category === 'invisible' && !filterText.includes('ล่อง')) return false;
-        return terms.every(t => p.name.toLowerCase().includes(t));
-    });
-
-    if (filtered.length === 0) { listDiv.innerHTML = "<div style='text-align:center; padding:20px; color:#999;'>ไม่พบสินค้า</div>"; return; }
-
-    filtered.forEach(p => {
-        const div = document.createElement('div'); div.className = 'product-row';
-        let color = p.price < 0 ? "red" : (p.category==='invisible'?'#aaa':'#007bff');
-        div.innerHTML = `<span>${p.name}</span> <span style="font-weight:bold; color:${color};">${p.price.toLocaleString()}</span>`;
-        div.onclick = () => addToCart(p);
-        listDiv.appendChild(div);
-    });
-}
-
-function addToCart(p) {
-    const found = cart.find(i => i.name === p.name);
-    if (found) found.qty++; else cart.push({ ...p, qty: 1 });
-    renderCart();
-}
-
-function renderCart() {
-    const div = document.getElementById('cartContents'); div.innerHTML = "";
-    const totalDiv = document.getElementById('totalPrice');
-    if (cart.length === 0) { div.innerHTML = "<div style='text-align:center; color:#999; margin-top:30px;'>ว่างเปล่า</div>"; totalDiv.innerText="0.-"; return; }
+    /* --- ช่องค้นหา --- */
+    .search-wrapper { position: relative; flex: 1; display: flex; align-items: center; }
+    .search-box { 
+      width: 100%; padding: 10px 35px 10px 10px; 
+      border: 1px solid #ccc; border-radius: 6px; font-size: 16px; 
+      background: #fff;
+    }
+    .search-box:focus { outline: none; border-color: #aaa; }
     
-    let total = 0;
-    cart.forEach((item, i) => {
-        total += item.price * item.qty;
-        const row = document.createElement('div'); row.className = 'cart-row';
-        let priceStyle = item.price < 0 ? "color:red" : "color:#333";
-        row.innerHTML = `
-            <div style="flex:1; padding-right:5px;">
-                <div style="font-weight:bold; ${priceStyle}">${item.name}</div>
-                <div style="font-size:11px; color:#666;">@${item.price}</div>
+    #clearSearch {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 16px; color: #bbb; cursor: pointer;
+      width: 24px; height: 24px; line-height: 24px; text-align: center;
+      border-radius: 50%; background: #f0f0f0; 
+      display: none; font-weight: bold;
+    }
+    #clearSearch:hover { background: #ddd; color: #555; }
+
+    /* Custom Dropdown */
+    .suggestions-list {
+      position: absolute; top: 100%; left: 0; width: 100%;
+      background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      list-style: none; padding: 0; margin: 0;
+      z-index: 1000; display: none;
+      max-height: 250px; overflow-y: auto;
+    }
+    .suggestions-list li {
+      padding: 12px 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer; font-size: 15px; color: #333;
+    }
+    .suggestions-list li:hover { background: #e3f2fd; color: #007bff; }
+    .suggestions-list li:last-child { border-bottom: none; }
+
+    /* --- Layout Container --- */
+    .container { 
+      display: flex; height: 100%; gap: 10px; padding: 10px;
+      box-sizing: border-box; overflow: hidden;
+    }
+
+    /* --- Media Query (คอมพิวเตอร์) --- */
+    @media (min-width: 769px) { .left-panel { flex: 1.4; } .right-panel { flex: 1.1; } }
+
+    /* --- Media Query (มือถือ 55:45) --- */
+    @media (max-width: 768px) {
+      .container { flex-direction: column; padding: 5px; gap: 5px !important; }
+      
+      .left-panel { 
+        flex: none; 
+        height: 55%; 
+        border-radius: 8px 8px 0 0 !important; border-bottom: none !important; 
+      }
+      
+      .right-panel { 
+        flex: none; 
+        height: calc(45% - 5px); 
+        border-radius: 0 0 8px 8px !important; border-top: 1px solid #ddd !important; 
+      }
+      
+      .cart-items { flex: 1; min-height: 0; }
+      .footer-section { padding-bottom: 10px !important; }
+      
+      .btn-qty, .btn-trash { width: 30px; height: 30px; font-size: 14px; }
+      .product-row { padding: 10px; font-size: 14px; }
+      .cart-row { padding: 4px 0; font-size: 13px; }
+      .total-price { font-size: 20px; margin-bottom: 2px; }
+      .btn-save-bill { padding: 8px; font-size: 13px; }
+      .btn-bill { font-size: 11px; padding: 8px; } 
+      .action-group { height: 38px; }
+    }
+
+    /* --- Common Styles --- */
+    .left-panel, .right-panel { display: flex; flex-direction: column; background: white; border-radius: 8px; border: 1px solid #ddd; overflow: hidden; }
+    .tabs { display: flex; background: #eee; border-bottom: 1px solid #ddd; flex-shrink: 0; }
+    .tab-btn { flex: 1; padding: 12px; border: none; font-weight: bold; color: #666; background: #eee; outline: none; }
+    .tab-btn.active { background: #007bff; color: white; }
+    .tab-content { flex: 1; display: none; flex-direction: column; padding: 5px; overflow: hidden; }
+    .tab-content.active { display: flex; }
+    
+    .tools-bar { display: flex; gap: 5px; margin-bottom: 5px; flex-shrink: 0; align-items: center; z-index: 10; position: relative; }
+    
+    .scroll-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; border: 1px solid #eee; }
+    .product-row { border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; }
+    .product-row:active { background-color: #e3f2fd; }
+    .saved-bill-row { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .cart-header { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 2px solid #333; flex-shrink: 0; background: #fff; }
+    .cart-items { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fafafa; padding: 5px; }
+    .cart-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 5px 0; background: white; margin-bottom: 2px; }
+    .cart-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+    .qty-group { display: flex; align-items: center; gap: 3px; }
+    .btn-qty { border: 1px solid #bbb; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+    /* ✅ ปุ่มลบ (ใช้ class เดิมแต่เดี๋ยวเปลี่ยน content ใน JS) */
+    .btn-trash { background: #dc3545; color: white; border: none; border-radius: 4px; margin-left: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .footer-section { padding: 5px 8px 8px 8px; border-top: 1px solid #ddd; background: #fff; flex-shrink: 0; }
+    .total-price { text-align: right; font-size: 24px; font-weight: bold; color: #28a745; margin-bottom: 5px; }
+    .btn-save-bill { width: 100%; background: #6f42c1; color: white; padding: 8px; border: none; border-radius: 4px; margin-bottom: 5px; font-size: 14px; font-weight: bold; }
+    .action-group { display: flex; gap: 5px; height: 40px; }
+    .btn-bill { flex: 1; border: none; border-radius: 4px; color: white; font-weight: bold; font-size: 13px; }
+    .btn-price { background: #007bff; } .btn-noprice { background: #fd7e14; }
+    .btn-clear-all { width: 40px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .btn-action-sm { padding: 5px 10px; border: none; border-radius: 4px; color: white; font-size: 12px; margin-left: 3px; }
+    .btn-load { background: #28a745; } .btn-del { background: #dc3545; }
+    #billCanvas { display: none; }
+  </style>
+</head>
+<body>
+
+<div id="loginOverlay">
+  <div class="login-box">
+    <div style="font-size:45px; margin-bottom:15px;">🔐</div>
+    <h3 style="margin:0 0 20px 0; color:#333;">เข้าสู่ระบบ POK POS</h3>
+    <input type="text" id="loginUser" class="login-input" placeholder="ชื่อผู้ใช้">
+    <input type="password" id="loginPass" class="login-input" placeholder="รหัสผ่าน">
+    <label class="remember-me">
+      <input type="checkbox" id="rememberMe"> จำรหัสผ่านไว้
+    </label>
+    <button id="btnLogin" class="btn-login">เข้าใช้งาน</button>
+    <div id="loginError" style="color:#dc3545; margin-top:15px; font-size:14px; display:none;">ชื่อหรือรหัสผ่านไม่ถูกต้อง!</div>
+  </div>
+</div>
+
+<div class="container" id="mainApp">
+  <div class="left-panel">
+    <div class="tabs">
+        <button id="tabProductBtn" class="tab-btn active">📦 สินค้า</button>
+        <button id="tabSavedBtn" class="tab-btn">💾 บิลที่บันทึก</button>
+    </div>
+    <div id="tabProductContent" class="tab-content active">
+        <div class="tools-bar">
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหา..." autocomplete="off">
+                <span id="clearSearch">✕</span>
+                <ul id="customSuggestions" class="suggestions-list">
+                    <li>วงล้อ</li>
+                    <li>ดุม</li>
+                    <li>ซี่ลวด</li>
+                    <li>ยาง</li>
+                    <li>อื่นๆ</li>
+                    <li>เทิร์นล้อ</li>
+                    <li>ส่วนลด</li>
+                </ul>
             </div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end;">
-                <div style="font-weight:bold; ${priceStyle}">${(item.price*item.qty).toLocaleString()}</div>
-                <div class="qty-group" style="margin-top:3px;">
-                    <button class="btn-qty" onclick="updQty(${i}, -1)">-</button>
-                    <span style="width:20px; text-align:center; font-weight:bold;">${item.qty}</span>
-                    <button class="btn-qty" onclick="updQty(${i}, 1)">+</button>
-                    <button class="btn-trash" onclick="remItem(${i})">×</button>
-                </div>
-            </div>
-        `;
-        div.appendChild(row);
-    });
-    totalDiv.innerText = `รวม: ${total.toLocaleString()}.-`;
-}
-
-window.updQty = (i, chg) => { if(cart[i].qty+chg > 0) cart[i].qty+=chg; else cart.splice(i,1); renderCart(); };
-window.remItem = (i) => { cart.splice(i, 1); renderCart(); };
-
-document.getElementById('btnSaveOrder').onclick = () => {
-    if(cart.length===0) return;
-    let name = prompt("ตั้งชื่อบิล:");
-    if(name) {
-        savedBills.push({ id: Date.now(), name, items: JSON.parse(JSON.stringify(cart)), date: new Date().toLocaleString() });
-        localStorage.setItem('savedBills', JSON.stringify(savedBills));
-        document.getElementById('tabSavedBtn').click();
-    }
-};
-
-function renderSavedBills() {
-    const list = document.getElementById('savedBillList'); list.innerHTML = "";
-    if (savedBills.length === 0) { list.innerHTML = "<div style='text-align:center; color:#999; margin-top:20px;'>ไม่มีบิล</div>"; return; }
-    savedBills.forEach((b, i) => {
-        const div = document.createElement('div'); div.className = 'saved-bill-row';
-        let total = b.items.reduce((s, x) => s + (x.price*x.qty), 0);
-        div.innerHTML = `<div style="flex:1;"><b>${b.name}</b> <small>(${total.toLocaleString()}.-)</small><br><small style="color:#aaa">${b.date}</small></div>
-        <div><button class="btn-action-sm btn-load" onclick="loadBill(${i})">โหลด</button><button class="btn-action-sm btn-del" onclick="delBill(${i})">ลบ</button></div>`;
-        list.appendChild(div);
-    });
-}
-window.loadBill = (i) => { cart = JSON.parse(JSON.stringify(savedBills[i].items)); renderCart(); };
-window.delBill = (i) => { if(confirm("ลบ?")) { savedBills.splice(i,1); localStorage.setItem('savedBills', JSON.stringify(savedBills)); renderSavedBills(); }};
-
-document.getElementById('clearCart').onclick = () => { if(confirm("ล้างตะกร้า?")) { cart=[]; renderCart(); }};
-document.getElementById('savePrice').onclick = () => genBill(true);
-document.getElementById('saveNoPrice').onclick = () => genBill(false);
-
-function genBill(showPrice) {
-    if(cart.length===0) return;
-    const cvs = document.getElementById('billCanvas'); const ctx = cvs.getContext('2d');
-    const W = 600, P = 30;
-    const LH = 40; 
-    const items = cart.filter(i => showPrice || i.category !== 'invisible');
-    
-    cvs.width = W; cvs.height = 220 + (items.length * LH) + 520;
-    
-    ctx.fillStyle = "white"; ctx.fillRect(0,0,cvs.width,cvs.height);
-    let y = 30;
-    
-    if(globalLogo.complete) { 
-        ctx.drawImage(globalLogo, (W-120)/2, y, 120, 120); y+=140; 
-    } else y+=60;
-
-    ctx.fillStyle="black"; ctx.font="bold 26px sans-serif"; ctx.textAlign="center";
-    ctx.fillText("ป๊อกล้อซิ่งพระราม 3 by POK", W/2, y); y+=30;
-    
-    ctx.font="16px sans-serif"; ctx.fillStyle="#555";
-    ctx.fillText(`วันที่: ${new Date().toLocaleString('th-TH')}`, W/2, y); y+=25;
-    
-    ctx.beginPath(); ctx.moveTo(P, y); ctx.lineTo(W-P, y); ctx.strokeStyle="#ddd"; ctx.stroke(); y+=35;
-
-    ctx.font="20px sans-serif"; 
-    items.forEach(i => {
-        ctx.textAlign="left"; ctx.fillStyle="black";
-        let n = i.name.length > 38 ? i.name.substring(0,36)+"..." : i.name;
-        ctx.fillText(n, P, y);
-        ctx.textAlign="right";
-        if(showPrice) {
-            if(i.price<0) ctx.fillStyle="red";
-            ctx.fillText(`${i.qty} ${i.unit}  ${(i.price*i.qty).toLocaleString()}`, W-P, y);
-        } else ctx.fillText(`${i.qty} ${i.unit}`, W-P, y);
-        y+=LH;
-    });
-
-    y+=5; ctx.beginPath(); ctx.moveTo(P, y); ctx.lineTo(W-P, y); ctx.strokeStyle="black"; ctx.stroke(); y+=45;
-    
-    let total = cart.reduce((s, i) => s + (i.price*i.qty), 0);
-    ctx.font="bold 30px sans-serif"; ctx.fillStyle="#007bff"; ctx.textAlign="right";
-    ctx.fillText(`ยอดสุทธิ: ${total.toLocaleString()} บาท`, W-P, y); y+=50;
-
-    ctx.font="bold 18px sans-serif"; ctx.fillStyle="#333"; ctx.textAlign="center";
-    ctx.fillText("ธนาคารกสิกรไทย (KBANK)", W/2, y); y+=30;
-    
-    ctx.font="bold 24px sans-serif"; 
-    ctx.fillText("077-3-90831-1", W/2, y); y+=30;
-    
-    ctx.font="18px sans-serif"; 
-    ctx.fillText("นายประกาศิต ยืนยั่ง", W/2, y); y+=40;
-
-    const qrSize = 250;
-    const qrX = (W - qrSize) / 2;
-
-    ctx.strokeStyle = "#000"; 
-    ctx.lineWidth = 2;        
-    ctx.strokeRect(qrX, y, qrSize, qrSize); 
-
-    if(globalQr.complete) {
-        ctx.drawImage(globalQr, qrX, y, qrSize, qrSize);
-    }
-    
-    setTimeout(() => {
-        const link = document.createElement('a'); link.download = `Bill-${Date.now()}.png`;
-        link.href = cvs.toDataURL(); link.click();
-    }, 200);
-}
+            <button id="btnLogout" class="btn-logout">ออกระบบ</button>
+        </div>
+        <div id="itemList" class="scroll-list"></div>
+    </div>
+    <div id="tabSavedContent" class="tab-content">
+        <div id="savedBillList" class="scroll-list"><div style="text-align:center; color:#999; margin-top:20px;">ไม่มีบิล</div></div>
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="cart-header">
+        <span style="font-weight:bold; font-size:16px;">🛒 ตะกร้าสินค้า</span>
+    </div>
+    <div id="cartContents" class="cart-items"><div style="text-align:center; color:#999; margin-top:30px;">ว่างเปล่า</div></div>
+    <div class="footer-section">
+        <div id="totalPrice" class="total-price">0.-</div>
+        <button id="btnSaveOrder" class="btn-save-bill">💾 บันทึกบิลเก็บไว้</button>
+        <div class="action-group">
+            <button id="savePrice" class="btn-bill btn-price">บิลแสดงราคา</button>
+            <button id="saveNoPrice" class="btn-bill btn-noprice">บิลไม่แสดงราคา</button>
+            <button id="clearCart" class="btn-clear-all">🗑️</button>
+        </div>
+    </div>
+  </div>
+</div>
+<canvas id="billCanvas"></canvas>
+<script src="script.js"></script>
+</body>
+</html>
