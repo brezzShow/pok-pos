@@ -2,70 +2,74 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>POK POS</title>
   <style>
-    /* --- พื้นฐาน --- */
+    /* --- พื้นฐาน (แก้เรื่องความสูงล้น) --- */
     html, body {
       margin: 0; padding: 0;
       background-color: #f0f2f5;
       font-family: 'Sarabun', sans-serif;
-      /* แก้ปัญหาจอเลื่อนในมือถือด้วย dvh */
+      /* ใช้ dvh เพื่อให้พอดีจอจริงไม่รวมแถบ URL */
       height: 100dvh; 
       width: 100vw;
-      overflow: hidden; 
+      overflow: hidden; /* ห้ามสกรอลทั้งหน้า */
     }
 
     .container { 
       display: flex; 
-      height: 100%; /* ยึดตามความสูง body */
-      gap: 10px; 
+      height: 100%; 
       padding: 10px;
-      box-sizing: border-box;
-      overflow: hidden;
+      gap: 10px; 
+      box-sizing: border-box; /* คิดขอบรวมในขนาด */
     }
 
-    /* --- จอคอมพิวเตอร์ (แนวนอน) --- */
+    /* --- จอคอม (แนวนอน) --- */
     @media (min-width: 769px) {
       .left-panel { flex: 1.4; }
       .right-panel { flex: 1.1; }
+      .container { overflow: hidden; }
     }
 
     /* --- จอมือถือ (แนวตั้ง) --- */
     @media (max-width: 768px) {
       .container { 
         flex-direction: column; 
-        padding: 5px;
-        gap: 5px; 
+        padding: 5px; 
+        gap: 8px; /* เว้นระยะห่างนิดหน่อย */
+        /* เพิ่ม padding ล่างเผื่อจอ iPhone รุ่นมีติ่ง */
+        padding-bottom: env(safe-area-inset-bottom, 10px); 
       }
       
-      /* กล่องสินค้า (บน) - ลดความสูงลงอีกนิด */
+      /* กล่องบน (สินค้า) - ฟิกความสูงไว้แค่นี้พอ */
       .left-panel { 
-        flex: none; 
-        height: 38%; /* เหลือ 38% พอ */
-        border-radius: 8px 8px 0 0 !important;
-        border-bottom: 1px solid #ddd;
+        flex: none; /* ไม่ยืด */
+        height: 40%; /* เอาไป 40% ของจอ */
+        border-radius: 8px !important;
+        border: 1px solid #ddd;
       }
       
-      /* กล่องตะกร้า (ล่าง) - ให้พื้นที่เยอะขึ้น */
+      /* กล่องล่าง (ตะกร้า) - "ใช้พื้นที่ที่เหลือทั้งหมด" */
       .right-panel { 
-        flex: none; 
-        height: 62%; /* เอาไป 62% ปุ่มจะได้ไม่หาย */
-        border-radius: 0 0 8px 8px !important;
-        border-top: 2px solid #007bff;
+        flex: 1; /* ✅ พระเอกคือตัวนี้: ยืดจนเต็มพื้นที่ที่เหลือ */
+        min-height: 0; /* สำคัญ! เพื่อให้ของข้างในสกรอลได้ */
+        border-radius: 8px !important;
+        border: 1px solid #007bff;
+        display: flex;
+        flex-direction: column;
       }
 
-      /* ปรับขนาดตัวอักษรให้กระทัดรัด */
-      .cart-items { flex: 1; }
+      /* ปรับแต่งภายใน */
+      .cart-items { flex: 1; overflow-y: auto; } /* รายการยืดหดได้ */
+      .footer-section { flex-shrink: 0; } /* ส่วนปุ่มห้ามหด */
+
+      /* ขนาดปุ่มมือถือ */
       .btn-qty, .btn-trash { width: 32px; height: 32px; font-size: 16px; }
       .product-row { padding: 8px 10px; font-size: 14px; }
       .cart-row { padding: 5px 0; font-size: 14px; }
-      .total-price { font-size: 22px; margin-bottom: 2px; }
+      .total-price { font-size: 20px; margin-bottom: 5px; }
       
-      /* ปุ่มด้านล่าง */
-      .footer-section { padding-bottom: 15px !important; } /* ดันขึ้นมาจากขอบล่างนิดนึง */
       .btn-save-bill { padding: 10px; font-size: 14px; }
-      .btn-bill { font-size: 12px; padding: 8px; } 
       .action-group { height: 40px; }
     }
 
@@ -74,12 +78,11 @@
       display: flex; 
       flex-direction: column; 
       background: white; 
-      border-radius: 8px; 
-      border: 1px solid #ddd; 
       overflow: hidden;
+      border-radius: 8px;
     }
 
-    /* Tabs & Tools */
+    /* Tabs */
     .tabs { display: flex; background: #eee; border-bottom: 1px solid #ddd; flex-shrink: 0; }
     .tab-btn { flex: 1; padding: 10px; border: none; font-weight: bold; color: #666; background: #eee; outline: none; }
     .tab-btn.active { background: #007bff; color: white; }
@@ -89,26 +92,26 @@
     
     .tools-bar { display: flex; gap: 5px; margin-bottom: 5px; flex-shrink: 0; }
     .search-box { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
-    .btn-csv { background: #607d8b; color: white; border: none; border-radius: 4px; padding: 0 8px; font-size: 12px; }
-
+    
     /* Lists */
     .scroll-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; border: 1px solid #eee; }
     .product-row { border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; padding: 10px; cursor: pointer; }
-    .product-row:active { background-color: #e3f2fd; }
     .saved-bill-row { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
 
-    /* Cart Layout */
+    /* Cart Header */
     .cart-header { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 2px solid #333; flex-shrink: 0; background: #fff; }
+    
+    /* Cart Items */
     .cart-items { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fafafa; padding: 5px; }
     .cart-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 5px 0; background: white; margin-bottom: 2px; }
-    
     .cart-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+    
     .qty-group { display: flex; align-items: center; gap: 3px; }
-    .btn-qty { border: 1px solid #bbb; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
-    .btn-trash { background: #dc3545; color: white; border: none; border-radius: 4px; margin-left: 3px; display: flex; align-items: center; justify-content: center; }
+    .btn-qty { border: 1px solid #bbb; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; width: 25px; height: 25px;}
+    .btn-trash { background: #dc3545; color: white; border: none; border-radius: 4px; margin-left: 3px; display: flex; align-items: center; justify-content: center; width: 25px; height: 25px;}
 
     /* Footer Buttons */
-    .footer-section { padding: 5px 8px 8px 8px; border-top: 1px solid #ddd; background: #fff; flex-shrink: 0; }
+    .footer-section { padding: 8px; border-top: 1px solid #ddd; background: #fff; flex-shrink: 0; }
     .total-price { text-align: right; font-size: 24px; font-weight: bold; color: #28a745; margin-bottom: 5px; }
     
     .btn-save-bill { width: 100%; background: #6f42c1; color: white; padding: 8px; border: none; border-radius: 4px; margin-bottom: 5px; font-size: 14px; font-weight: bold; }
@@ -122,7 +125,7 @@
     /* Utilities */
     .btn-action-sm { padding: 5px 10px; border: none; border-radius: 4px; color: white; font-size: 12px; margin-left: 3px; }
     .btn-load { background: #28a745; } .btn-del { background: #dc3545; }
-    #csvInput, #billCanvas { display: none; }
+    #csvInput, #billCanvas, .btn-csv { display: none; }
   </style>
 </head>
 <body>
@@ -131,15 +134,12 @@
   <div class="left-panel">
     <div class="tabs">
         <button id="tabProductBtn" class="tab-btn active">📦 สินค้า</button>
-        <button id="tabSavedBtn" class="tab-btn">💾 บิลที่บันทึกไว้</button>
+        <button id="tabSavedBtn" class="tab-btn">💾 บิลเก่า</button>
     </div>
 
     <div id="tabProductContent" class="tab-content active">
         <div class="tools-bar">
             <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหา...">
-            <button id="btnExport" class="btn-csv" style="display:none;">Exp</button>
-            <button id="btnImport" class="btn-csv" style="display:none;">Imp</button>
-            <input type="file" id="csvInput" accept=".csv">
         </div>
         <div id="itemList" class="scroll-list"></div>
     </div>
