@@ -285,7 +285,7 @@ function genBill(showPrice) {
     cvs.width = W; cvs.height = 220 + (items.length * LH) + 520;
     
     ctx.fillStyle = "white"; ctx.fillRect(0,0,cvs.width,cvs.height);
-    let y = 10;
+    let y = -10;
     
     if(globalLogo.complete) { 
         ctx.drawImage(globalLogo, (W-165)/2, y, 165, 165); y+=160; 
