@@ -3,7 +3,6 @@ const globalQr = new Image(); globalQr.src = 'qr.png';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQaYhTGhkPtCm2XIsiiFTdaft7WsLzcH7-Bfk_hYyPsQn-gARm2lbGApZYEf71wdDDbQXP93cTNpZC/pub?output=csv'; 
 
-// ✅ ข้อมูลล็อกอิน (Trim เพื่อความชัวร์)
 const USER = "pokuser";
 const PASS = "pok@rama3Shop";
 
@@ -22,31 +21,23 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- ระบบล็อกอิน ---
 function checkLogin() {
     const isLogged = localStorage.getItem('pok_isLogged');
-    // ถ้าเคยล็อกอินและกดจำไว้ -> ผ่านเลย
     if (isLogged === 'true') {
         document.getElementById('loginOverlay').style.display = 'none';
     } else {
         document.getElementById('loginOverlay').style.display = 'flex';
-        // เคลียร์ช่องกรอกเพื่อความปลอดภัย
         document.getElementById('loginUser').value = '';
         document.getElementById('loginPass').value = '';
     }
 }
 
 document.getElementById('btnLogin').onclick = () => {
-    // .trim() ช่วยตัดช่องว่างหน้าหลังออกกันพลาด
     const u = document.getElementById('loginUser').value.trim();
     const p = document.getElementById('loginPass').value.trim();
     const remember = document.getElementById('rememberMe').checked;
 
     if (u === USER && p === PASS) {
-        if (remember) {
-            localStorage.setItem('pok_isLogged', 'true');
-        } else {
-            // ถ้าไม่จำ ให้เก็บแบบชั่วคราว (session) หรือไม่เก็บเลยก็ได้
-            // ในที่นี้ถ้าไม่จำ พอรีเฟรชก็ต้องเข้าใหม่
-            localStorage.removeItem('pok_isLogged'); 
-        }
+        if (remember) localStorage.setItem('pok_isLogged', 'true');
+        else localStorage.removeItem('pok_isLogged');
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('loginError').style.display = 'none';
     } else {
@@ -54,28 +45,49 @@ document.getElementById('btnLogin').onclick = () => {
     }
 };
 
-// --- ปุ่ม Logout ---
 document.getElementById('btnLogout').onclick = () => {
     if(confirm('ต้องการออกจากระบบ?')) {
-        localStorage.removeItem('pok_isLogged'); // ลบสถานะล็อกอิน
-        location.reload(); // รีเฟรชหน้าเว็บเพื่อกลับไปหน้าล็อกอิน
+        localStorage.removeItem('pok_isLogged');
+        location.reload();
     }
 };
 
-// --- ฟังก์ชันค้นหา ---
+// --- ฟังก์ชันค้นหา (Custom Dropdown) ---
 function setupSearchFeatures() {
     const input = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearSearch');
+    const suggestions = document.getElementById('customSuggestions');
+    const options = suggestions.querySelectorAll('li');
 
+    // โชว์ Dropdown เมื่อกดที่ช่อง
+    input.addEventListener('focus', () => {
+        suggestions.style.display = 'block';
+    });
+
+    // ซ่อน Dropdown เมื่อคลิกที่อื่น (Delayed เพื่อให้กดรายการทัน)
+    input.addEventListener('blur', () => {
+        setTimeout(() => { suggestions.style.display = 'none'; }, 200);
+    });
+
+    // พิมพ์แล้วกรอง
     input.addEventListener('input', (e) => {
         displayProducts(e.target.value);
     });
 
+    // กดปุ่ม X
     clearBtn.addEventListener('click', () => {
         input.value = "";
-        clearBtn.style.display = 'none';
         displayProducts("");
         input.focus();
+    });
+
+    // กดเลือกรายการใน Dropdown
+    options.forEach(opt => {
+        opt.addEventListener('click', () => {
+            input.value = opt.innerText;
+            displayProducts(opt.innerText);
+            suggestions.style.display = 'none';
+        });
     });
 }
 
