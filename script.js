@@ -52,44 +52,52 @@ document.getElementById('btnLogout').onclick = () => {
     }
 };
 
-// --- ฟังก์ชันค้นหา (แก้ไข Logic กด X) ---
+// --- ฟังก์ชันค้นหา (แก้กดซ้ำเพื่อ Toggle) ---
 function setupSearchFeatures() {
     const input = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearSearch');
     const suggestions = document.getElementById('customSuggestions');
     const options = suggestions.querySelectorAll('li');
 
-    // โชว์ Dropdown เมื่อกดที่ช่อง
-    input.addEventListener('focus', () => {
-        suggestions.style.display = 'block';
+    // ✅ คลิกที่ช่อง: ถ้าเปิดอยู่ให้ปิด ถ้าปิดอยู่ให้เปิด (Toggle)
+    input.addEventListener('click', (e) => {
+        e.stopPropagation(); // กันไม่ให้ไปชนกับ event ของ document
+        if (suggestions.style.display === 'block') {
+            suggestions.style.display = 'none';
+        } else {
+            suggestions.style.display = 'block';
+        }
     });
 
-    // ซ่อน Dropdown เมื่อคลิกที่อื่น (Delayed)
-    input.addEventListener('blur', () => {
-        setTimeout(() => { suggestions.style.display = 'none'; }, 200);
+    // คลิกที่อื่นในจอเพื่อปิด
+    document.addEventListener('click', (e) => {
+        if (e.target !== input && e.target !== suggestions) {
+            suggestions.style.display = 'none';
+        }
     });
 
     input.addEventListener('input', (e) => {
         displayProducts(e.target.value);
         clearBtn.style.display = e.target.value.length > 0 ? 'block' : 'none';
+        suggestions.style.display = 'none'; // พิมพ์แล้วซ่อน Dropdown
     });
 
-    // ✅ กด X แล้วล้างค่า + เรียก Dropdown กลับมา
+    // กดปุ่ม X
     clearBtn.addEventListener('click', () => {
         input.value = "";
-        displayProducts(""); // โชว์สินค้าทั้งหมด
-        input.focus(); // โฟกัสกลับที่ช่องพิมพ์
-        suggestions.style.display = 'block'; // บังคับโชว์ Dropdown อีกครั้ง
-        clearBtn.style.display = 'none'; // ซ่อนปุ่ม X เพราะไม่มีข้อความแล้ว
+        displayProducts(""); 
+        input.focus();
+        suggestions.style.display = 'block'; // กดลบแล้วเด้ง Dropdown มาให้เลือกใหม่
+        clearBtn.style.display = 'none';
     });
 
-    // กดเลือกรายการ
+    // เลือกรายการ
     options.forEach(opt => {
         opt.addEventListener('click', () => {
             input.value = opt.innerText;
             displayProducts(opt.innerText);
             suggestions.style.display = 'none';
-            clearBtn.style.display = 'block'; // โชว์ปุ่ม X
+            clearBtn.style.display = 'block';
         });
     });
 }
@@ -185,7 +193,7 @@ function renderCart() {
                     <button class="btn-qty" onclick="updQty(${i}, -1)">-</button>
                     <span style="width:20px; text-align:center; font-weight:bold;">${item.qty}</span>
                     <button class="btn-qty" onclick="updQty(${i}, 1)">+</button>
-                    <button class="btn-trash" onclick="remItem(${i})">🗑️</button>
+                    <button class="btn-trash" onclick="remItem(${i})">✕</button>
                 </div>
             </div>
         `;
