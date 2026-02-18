@@ -1,7 +1,6 @@
 const globalLogo = new Image(); globalLogo.src = 'logo.png';
 const globalQr = new Image(); globalQr.src = 'qr.png';
 
-// ลิงก์ Google Sheets เดิม
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQaYhTGhkPtCm2XIsiiFTdaft7WsLzcH7-Bfk_hYyPsQn-gARm2lbGApZYEf71wdDDbQXP93cTNpZC/pub?output=csv'; 
 
 let products = [];
@@ -153,8 +152,8 @@ function genBill(showPrice) {
     const LH = 40; 
     const items = cart.filter(i => showPrice || i.category !== 'invisible');
     
-    // ✅ ลดพื้นที่ด้านล่างลงอีก 50px (จาก 480 เหลือ 430)
-    cvs.width = W; cvs.height = 220 + (items.length * LH) + 430;
+    // ✅ 1. เพิ่มพื้นที่ด้านล่าง (จาก 460 เป็น 520) ให้ดูพอดีๆ
+    cvs.width = W; cvs.height = 220 + (items.length * LH) + 520;
     
     ctx.fillStyle = "white"; ctx.fillRect(0,0,cvs.width,cvs.height);
     let y = 30;
@@ -199,7 +198,17 @@ function genBill(showPrice) {
     ctx.font="18px sans-serif"; 
     ctx.fillText("นายประกาศิต ยืนยั่ง", W/2, y); y+=40;
 
-    if(globalQr.complete) ctx.drawImage(globalQr, (W-250)/2, y, 250, 250);
+    const qrSize = 250;
+    const qrX = (W - qrSize) / 2;
+
+    // ✅ 2. เพิ่มเส้นขอบให้ QR Code
+    ctx.strokeStyle = "#000"; // สีขอบดำ
+    ctx.lineWidth = 2;        // ความหนาเส้นขอบ
+    ctx.strokeRect(qrX, y, qrSize, qrSize); // วาดสี่เหลี่ยม
+
+    if(globalQr.complete) {
+        ctx.drawImage(globalQr, qrX, y, qrSize, qrSize);
+    }
     
     setTimeout(() => {
         const link = document.createElement('a'); link.download = `Bill-${Date.now()}.png`;
