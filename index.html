@@ -10,7 +10,7 @@
       margin: 0; padding: 0;
       background-color: #f0f2f5;
       font-family: 'Sarabun', sans-serif;
-      height: 100dvh; /* ใช้ dvh แก้จอเลื่อนในมือถือ */
+      height: 100dvh; 
       width: 100vw;
       overflow: hidden; 
     }
@@ -30,31 +30,31 @@
       .right-panel { flex: 1.1; }
     }
 
-    /* --- จอมือถือ (แก้ไขขอบน้ำเงินตรงนี้) --- */
+    /* --- จอมือถือ (จุดที่แก้ไข) --- */
     @media (max-width: 768px) {
       .container { 
         flex-direction: column; 
         padding: 5px;
-        gap: 0; /* ติดกันเลย */
+        /* ✅ 1. เพิ่ม gap 5px ตามที่ขอ */
+        gap: 5px !important; 
       }
       
       .left-panel { 
         flex: none; 
         height: 38%; 
         border-radius: 8px 8px 0 0 !important;
-        /* ลบ border-bottom ออก */
         border-bottom: none !important;
       }
       
       .right-panel { 
         flex: none; 
-        height: 62%;
+        /* ✅ 2. ปรับความสูงโดยลบ 5px ออก เพื่อชดเชยกับ gap ที่เพิ่มมา (ปุ่มจะได้ไม่หาย) */
+        height: calc(62% - 5px); 
         border-radius: 0 0 8px 8px !important;
-        /* ✅ แก้ไข: เปลี่ยนขอบน้ำเงินหนาๆ เป็นเส้นเทาบางๆ */
         border-top: 1px solid #ddd !important; 
       }
 
-      /* ปรับขนาดต่างๆ ในมือถือ */
+      /* ปรับขนาดต่างๆ */
       .cart-items { flex: 1; }
       .btn-qty, .btn-trash { width: 32px; height: 32px; font-size: 16px; }
       .product-row { padding: 8px 10px; font-size: 14px; }
