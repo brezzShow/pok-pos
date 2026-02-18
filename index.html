@@ -15,48 +15,67 @@
       overflow: hidden; 
     }
 
+    /* --- หน้า Login --- */
+    #loginOverlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); /* พื้นหลังทึบ */
+      z-index: 9999;
+      display: flex; justify-content: center; align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    .login-box {
+      background: white; padding: 30px; border-radius: 12px;
+      width: 90%; max-width: 350px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+    .login-input {
+      width: 100%; padding: 12px; margin: 10px 0;
+      border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px;
+    }
+    .btn-login {
+      width: 100%; padding: 12px; background: #007bff; color: white;
+      border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn-login:active { background: #0056b3; }
+    .remember-me {
+      display: flex; align-items: center; justify-content: flex-start;
+      margin-bottom: 15px; font-size: 14px; color: #555;
+    }
+    .remember-me input { margin-right: 8px; width: 18px; height: 18px; }
+
+    /* --- คอนเทนเนอร์หลัก --- */
     .container { 
-      display: flex; 
-      height: 100%; 
-      gap: 10px; 
-      padding: 10px;
-      box-sizing: border-box;
-      overflow: hidden;
+      display: flex; height: 100%; gap: 10px; padding: 10px;
+      box-sizing: border-box; overflow: hidden;
+      filter: blur(0); transition: 0.3s; /* เตรียมไว้เบลอตอนยังไม่ล็อกอิน */
+    }
+
+    /* --- ช่องค้นหา (ปรับปรุงใหม่) --- */
+    .search-wrapper { position: relative; flex: 1; display: flex; align-items: center; }
+    .search-box { 
+      width: 100%; padding: 10px 35px 10px 10px; /* เว้นที่ขวาไว้ให้ปุ่ม X */
+      border: 1px solid #ccc; border-radius: 4px; font-size: 16px; 
+    }
+    #clearSearch {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      font-size: 18px; color: #999; cursor: pointer;
+      width: 24px; height: 24px; line-height: 24px; text-align: center;
+      border-radius: 50%; background: #eee; display: none; /* ซ่อนไว้ก่อน */
     }
 
     /* --- จอคอมพิวเตอร์ --- */
     @media (min-width: 769px) {
-      .left-panel { flex: 1.4; }
-      .right-panel { flex: 1.1; }
+      .left-panel { flex: 1.4; } .right-panel { flex: 1.1; }
     }
 
-    /* --- จอมือถือ (แก้ไขตรงนี้ครับ) --- */
+    /* --- จอมือถือ --- */
     @media (max-width: 768px) {
-      .container { 
-        flex-direction: column; 
-        padding: 5px;
-        /* ✅ เพิ่มช่องว่าง 5px */
-        gap: 5px; 
-      }
+      .container { flex-direction: column; padding: 5px; gap: 5px !important; }
+      .left-panel { flex: none; height: 38%; border-radius: 8px 8px 0 0 !important; border-bottom: none !important; }
+      .right-panel { flex: none; height: calc(62% - 5px); border-radius: 0 0 8px 8px !important; border-top: 1px solid #ddd !important; }
       
-      .left-panel { 
-        flex: none; 
-        height: 38%; 
-        /* ปรับให้มนทุกมุม เพราะแยกกล่องกันแล้ว */
-        border-radius: 8px !important; 
-        border-bottom: 1px solid #ddd !important;
-      }
-      
-      .right-panel { 
-        flex: none; 
-        /* ✅ คำนวณความสูงใหม่ (62% ลบออก 5px ที่เป็นช่องว่าง) ไม่งั้นจอเกิน */
-        height: calc(62% - 5px); 
-        /* ปรับให้มนทุกมุม */
-        border-radius: 8px !important; 
-        border-top: 1px solid #ddd !important; 
-      }
-
-      /* ปรับขนาดต่างๆ */
       .cart-items { flex: 1; }
       .btn-qty, .btn-trash { width: 32px; height: 32px; font-size: 16px; }
       .product-row { padding: 8px 10px; font-size: 14px; }
@@ -69,16 +88,13 @@
     }
 
     /* --- ดีไซน์กล่องทั่วไป --- */
-    .left-panel, .right-panel {
-      display: flex; flex-direction: column; background: white; border-radius: 8px; border: 1px solid #ddd; overflow: hidden;
-    }
+    .left-panel, .right-panel { display: flex; flex-direction: column; background: white; border-radius: 8px; border: 1px solid #ddd; overflow: hidden; }
     .tabs { display: flex; background: #eee; border-bottom: 1px solid #ddd; flex-shrink: 0; }
     .tab-btn { flex: 1; padding: 10px; border: none; font-weight: bold; color: #666; background: #eee; outline: none; }
     .tab-btn.active { background: #007bff; color: white; }
     .tab-content { flex: 1; display: none; flex-direction: column; padding: 5px; overflow: hidden; }
     .tab-content.active { display: flex; }
     .tools-bar { display: flex; gap: 5px; margin-bottom: 5px; flex-shrink: 0; }
-    .search-box { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
     .scroll-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; border: 1px solid #eee; }
     .product-row { border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; padding: 10px; cursor: pointer; }
     .product-row:active { background-color: #e3f2fd; }
@@ -99,11 +115,26 @@
     .btn-clear-all { width: 40px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 16px; display: flex; align-items: center; justify-content: center; }
     .btn-action-sm { padding: 5px 10px; border: none; border-radius: 4px; color: white; font-size: 12px; margin-left: 3px; }
     .btn-load { background: #28a745; } .btn-del { background: #dc3545; }
-    #billCanvas { display: none; }
+    #csvInput, #billCanvas { display: none; }
   </style>
 </head>
 <body>
-<div class="container">
+
+<div id="loginOverlay">
+  <div class="login-box">
+    <div style="font-size:40px; margin-bottom:10px;">🔐</div>
+    <h2 style="margin:0 0 20px 0; color:#333;">เข้าสู่ระบบ POK POS</h2>
+    <input type="text" id="loginUser" class="login-input" placeholder="ชื่อผู้ใช้ (Username)">
+    <input type="password" id="loginPass" class="login-input" placeholder="รหัสผ่าน (Password)">
+    <label class="remember-me">
+      <input type="checkbox" id="rememberMe"> จำรหัสผ่านไว้
+    </label>
+    <button id="btnLogin" class="btn-login">เข้าใช้งาน</button>
+    <div id="loginError" style="color:red; margin-top:10px; display:none;">ชื่อหรือรหัสผ่านไม่ถูกต้อง!</div>
+  </div>
+</div>
+
+<div class="container" id="mainApp">
   <div class="left-panel">
     <div class="tabs">
         <button id="tabProductBtn" class="tab-btn active">📦 สินค้า</button>
@@ -111,7 +142,19 @@
     </div>
     <div id="tabProductContent" class="tab-content active">
         <div class="tools-bar">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหา...">
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหา..." list="searchSuggestions">
+                <span id="clearSearch">×</span>
+            </div>
+            <datalist id="searchSuggestions">
+                <option value="วงล้อ">
+                <option value="ดุม">
+                <option value="ซี่ลวด">
+                <option value="ยาง">
+                <option value="อื่นๆ">
+                <option value="เทิร์นล้อ">
+                <option value="ส่วนลด">
+            </datalist>
         </div>
         <div id="itemList" class="scroll-list"></div>
     </div>
