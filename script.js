@@ -3,56 +3,18 @@ const globalQr = new Image(); globalQr.src = 'qr.png';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQaYhTGhkPtCm2XIsiiFTdaft7WsLzcH7-Bfk_hYyPsQn-gARm2lbGApZYEf71wdDDbQXP93cTNpZC/pub?output=csv'; 
 
-const USER = "pokuser";
-const PASS = "pok@rama3Shop";
-
 let products = [];
 let cart = [];
 let savedBills = JSON.parse(localStorage.getItem('savedBills')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    checkLogin();
     loadProductsFromSheet();
     renderSavedBills();
     setupTabs();
     setupSearchFeatures();
 });
 
-// --- ระบบล็อกอิน ---
-function checkLogin() {
-    const isLogged = localStorage.getItem('pok_isLogged');
-    if (isLogged === 'true') {
-        document.getElementById('loginOverlay').style.display = 'none';
-    } else {
-        document.getElementById('loginOverlay').style.display = 'flex';
-        document.getElementById('loginUser').value = '';
-        document.getElementById('loginPass').value = '';
-    }
-}
-
-document.getElementById('btnLogin').onclick = () => {
-    const u = document.getElementById('loginUser').value.trim();
-    const p = document.getElementById('loginPass').value.trim();
-    const remember = document.getElementById('rememberMe').checked;
-
-    if (u === USER && p === PASS) {
-        if (remember) localStorage.setItem('pok_isLogged', 'true');
-        else localStorage.removeItem('pok_isLogged');
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('loginError').style.display = 'none';
-    } else {
-        document.getElementById('loginError').style.display = 'block';
-    }
-};
-
-document.getElementById('btnLogout').onclick = () => {
-    if(confirm('ต้องการออกจากระบบ?')) {
-        localStorage.removeItem('pok_isLogged');
-        location.reload();
-    }
-};
-
-// --- ฟังก์ชันค้นหา & Dropdown (แก้ใหม่ตามสั่ง) ---
+// --- ฟังก์ชันค้นหา & Dropdown (Logic ปุ่ม X แก้ไขแล้ว) ---
 function setupSearchFeatures() {
     const input = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearSearch');
@@ -61,8 +23,7 @@ function setupSearchFeatures() {
 
     // 1. กดที่ช่อง input เพื่อ เปิด/ปิด Dropdown
     input.addEventListener('click', (e) => {
-        e.stopPropagation(); // กันไม่ให้ไปตีกับ event ปิด
-        // สลับเปิดปิด
+        e.stopPropagation();
         if (suggestions.style.display === 'block') {
             suggestions.style.display = 'none';
         } else {
@@ -74,30 +35,27 @@ function setupSearchFeatures() {
     input.addEventListener('input', (e) => {
         displayProducts(e.target.value);
         
-        // ✅ ถ้ามีข้อความให้โชว์ปุ่ม X ถ้าไม่มีให้ซ่อน
+        // ถ้ามีข้อความให้โชว์ปุ่ม X ถ้าไม่มีให้ซ่อน
         if (e.target.value.length > 0) {
             clearBtn.style.display = 'block';
         } else {
             clearBtn.style.display = 'none';
         }
 
-        // ตอนพิมพ์ให้ซ่อน Dropdown ไปก่อน (เพื่อให้เห็นผลลัพธ์สินค้า)
+        // ตอนพิมพ์ให้ซ่อน Dropdown ไปก่อน
         suggestions.style.display = 'none';
     });
 
-    // 3. ✅ ปุ่ม X (พระเอกของงานนี้)
+    // 3. ปุ่ม X (กดแล้วลบข้อความ + โชว์ Dropdown ค้างไว้)
     clearBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // ⛔ สำคัญมาก: ห้ามให้ event ทะลุไปปิด Dropdown
+        e.stopPropagation(); // ห้าม event ทะลุไปปิด Dropdown
         
-        input.value = "";       // 1. ลบข้อความ
-        displayProducts("");    // 2. รีเซ็ตรายการสินค้า
-        input.focus();          // 3. เอาเคอร์เซอร์ไปวางใหม่
+        input.value = "";       
+        displayProducts("");    
+        input.focus();          
         
-        // 4. ✅ สั่งเปิด Dropdown ทันที! (ไม่ให้ยุบหาย)
-        suggestions.style.display = 'block'; 
-        
-        // 5. ซ่อนปุ่ม X เพราะไม่มีข้อความแล้ว
-        clearBtn.style.display = 'none';
+        suggestions.style.display = 'block'; // สั่งเปิด Dropdown ทันที
+        clearBtn.style.display = 'none';     // ซ่อนปุ่ม X
     });
 
     // 4. เลือกคำจาก Dropdown
@@ -105,8 +63,8 @@ function setupSearchFeatures() {
         opt.addEventListener('click', () => {
             input.value = opt.innerText;
             displayProducts(opt.innerText);
-            suggestions.style.display = 'none'; // เลือกเสร็จปิด Dropdown
-            clearBtn.style.display = 'block';   // โชว์ปุ่ม X เพราะมีข้อความแล้ว
+            suggestions.style.display = 'none';
+            clearBtn.style.display = 'block';
         });
     });
 
@@ -115,32 +73,6 @@ function setupSearchFeatures() {
         if (e.target !== input && e.target !== suggestions && e.target !== clearBtn) {
             suggestions.style.display = 'none';
         }
-    });
-};
-
-    input.addEventListener('input', (e) => {
-        displayProducts(e.target.value);
-        clearBtn.style.display = e.target.value.length > 0 ? 'block' : 'none';
-        suggestions.style.display = 'none'; // พิมพ์แล้วซ่อน Dropdown
-    });
-
-    // กดปุ่ม X
-    clearBtn.addEventListener('click', () => {
-        input.value = "";
-        displayProducts(""); 
-        input.focus();
-        suggestions.style.display = 'block'; // กดลบแล้วเด้ง Dropdown มาให้เลือกใหม่
-        clearBtn.style.display = 'none';
-    });
-
-    // เลือกรายการ
-    options.forEach(opt => {
-        opt.addEventListener('click', () => {
-            input.value = opt.innerText;
-            displayProducts(opt.innerText);
-            suggestions.style.display = 'none';
-            clearBtn.style.display = 'block';
-        });
     });
 }
 
@@ -200,10 +132,11 @@ function displayProducts(filterText = "") {
     if (filtered.length === 0) { listDiv.innerHTML = "<div style='text-align:center; padding:20px; color:#999;'>ไม่พบสินค้า</div>"; return; }
 
     filtered.forEach(p => {
-        const div = document.createElement('div'); div.className = 'product-row';
+        const div = document.createElement('div');
+        div.className = 'product-row';
         let color = p.price < 0 ? "red" : (p.category==='invisible'?'#aaa':'#007bff');
         div.innerHTML = `<span>${p.name}</span> <span style="font-weight:bold; color:${color};">${p.price.toLocaleString()}</span>`;
-        div.onclick = () => addToCart(p);
+        div.addEventListener('click', () => addToCart(p));
         listDiv.appendChild(div);
     });
 }
@@ -215,37 +148,56 @@ function addToCart(p) {
 }
 
 function renderCart() {
-    const div = document.getElementById('cartContents'); div.innerHTML = "";
+    const div = document.getElementById('cartContents');
     const totalDiv = document.getElementById('totalPrice');
-    if (cart.length === 0) { div.innerHTML = "<div style='text-align:center; color:#999; margin-top:30px;'>ว่างเปล่า</div>"; totalDiv.innerText="0.-"; return; }
+    
+    div.innerHTML = "";
+    
+    if (cart.length === 0) { 
+        div.innerHTML = "<div style='text-align:center; color:#999; margin-top:30px;'>ว่างเปล่า</div>"; 
+        totalDiv.innerText = "0.-"; 
+        return; 
+    }
     
     let total = 0;
-    cart.forEach((item, i) => {
+    cart.forEach((item, index) => {
         total += item.price * item.qty;
+        
         const row = document.createElement('div'); row.className = 'cart-row';
+
+        const info = document.createElement('div'); info.className = 'cart-info';
         let priceStyle = item.price < 0 ? "color:red" : "color:#333";
-        row.innerHTML = `
-            <div style="flex:1; padding-right:5px;">
-                <div style="font-weight:bold; ${priceStyle}">${item.name}</div>
-                <div style="font-size:11px; color:#666;">@${item.price}</div>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end;">
-                <div style="font-weight:bold; ${priceStyle}">${(item.price*item.qty).toLocaleString()}</div>
-                <div class="qty-group" style="margin-top:3px;">
-                    <button class="btn-qty" onclick="updQty(${i}, -1)">-</button>
-                    <span style="width:20px; text-align:center; font-weight:bold;">${item.qty}</span>
-                    <button class="btn-qty" onclick="updQty(${i}, 1)">+</button>
-                    <button class="btn-trash" onclick="remItem(${i})">✕</button>
-                </div>
-            </div>
-        `;
+        info.innerHTML = `<div style="font-weight:bold; ${priceStyle}">${item.name}</div><div style="font-size:11px; color:#666;">@${item.price}</div>`;
+
+        const controls = document.createElement('div'); controls.className = 'cart-controls';
+        
+        const priceDisplay = document.createElement('div');
+        priceDisplay.style.fontWeight = 'bold';
+        priceDisplay.style.color = item.price < 0 ? 'red' : '#333';
+        priceDisplay.innerText = (item.price * item.qty).toLocaleString();
+
+        const qtyGroup = document.createElement('div'); qtyGroup.className = 'qty-group';
+
+        const btnMinus = document.createElement('button'); btnMinus.className = 'btn-qty'; btnMinus.textContent = '-';
+        btnMinus.onclick = () => { if(item.qty > 1) item.qty--; else cart.splice(index, 1); renderCart(); };
+
+        const qtySpan = document.createElement('span'); qtySpan.style.width = '20px'; qtySpan.style.textAlign = 'center'; qtySpan.style.fontWeight = 'bold';
+        qtySpan.innerText = item.qty;
+
+        const btnPlus = document.createElement('button'); btnPlus.className = 'btn-qty'; btnPlus.textContent = '+';
+        btnPlus.onclick = () => { item.qty++; renderCart(); };
+
+        const btnTrash = document.createElement('button'); btnTrash.className = 'btn-trash'; btnTrash.textContent = '✕';
+        btnTrash.onclick = () => { cart.splice(index, 1); renderCart(); };
+
+        qtyGroup.append(btnMinus, qtySpan, btnPlus, btnTrash);
+        controls.append(priceDisplay, qtyGroup);
+        row.append(info, controls);
         div.appendChild(row);
     });
+    
     totalDiv.innerText = `รวม: ${total.toLocaleString()}.-`;
 }
-
-window.updQty = (i, chg) => { if(cart[i].qty+chg > 0) cart[i].qty+=chg; else cart.splice(i,1); renderCart(); };
-window.remItem = (i) => { cart.splice(i, 1); renderCart(); };
 
 document.getElementById('btnSaveOrder').onclick = () => {
     if(cart.length===0) return;
@@ -263,13 +215,20 @@ function renderSavedBills() {
     savedBills.forEach((b, i) => {
         const div = document.createElement('div'); div.className = 'saved-bill-row';
         let total = b.items.reduce((s, x) => s + (x.price*x.qty), 0);
-        div.innerHTML = `<div style="flex:1;"><b>${b.name}</b> <small>(${total.toLocaleString()}.-)</small><br><small style="color:#aaa">${b.date}</small></div>
-        <div><button class="btn-action-sm btn-load" onclick="loadBill(${i})">โหลด</button><button class="btn-action-sm btn-del" onclick="delBill(${i})">ลบ</button></div>`;
+        div.innerHTML = `<div style="flex:1;"><b>${b.name}</b> <small>(${total.toLocaleString()}.-)</small><br><small style="color:#aaa">${b.date}</small></div>`;
+        
+        const btnGroup = document.createElement('div');
+        const btnLoad = document.createElement('button'); btnLoad.className = 'btn-action-sm btn-load'; btnLoad.textContent = 'โหลด';
+        btnLoad.onclick = () => { cart = JSON.parse(JSON.stringify(savedBills[i].items)); renderCart(); };
+
+        const btnDel = document.createElement('button'); btnDel.className = 'btn-action-sm btn-del'; btnDel.textContent = 'ลบ';
+        btnDel.onclick = () => { if(confirm("ลบ?")) { savedBills.splice(i,1); localStorage.setItem('savedBills', JSON.stringify(savedBills)); renderSavedBills(); }};
+
+        btnGroup.append(btnLoad, btnDel);
+        div.appendChild(btnGroup);
         list.appendChild(div);
     });
 }
-window.loadBill = (i) => { cart = JSON.parse(JSON.stringify(savedBills[i].items)); renderCart(); };
-window.delBill = (i) => { if(confirm("ลบ?")) { savedBills.splice(i,1); localStorage.setItem('savedBills', JSON.stringify(savedBills)); renderSavedBills(); }};
 
 document.getElementById('clearCart').onclick = () => { if(confirm("ล้างตะกร้า?")) { cart=[]; renderCart(); }};
 document.getElementById('savePrice').onclick = () => genBill(true);
@@ -285,10 +244,12 @@ function genBill(showPrice) {
     cvs.width = W; cvs.height = 220 + (items.length * LH) + 520;
     
     ctx.fillStyle = "white"; ctx.fillRect(0,0,cvs.width,cvs.height);
-    let y = -10;
+    
+    let y = -10; 
     
     if(globalLogo.complete) { 
-        ctx.drawImage(globalLogo, (W-165)/2, y, 165, 165); y+=160; 
+        ctx.drawImage(globalLogo, (W-165)/2, y, 165, 165); 
+        y+=160; 
     } else y+=60;
 
     ctx.fillStyle="black"; ctx.font="bold 26px sans-serif"; ctx.textAlign="center";
