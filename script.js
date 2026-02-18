@@ -1,7 +1,6 @@
 const globalLogo = new Image(); globalLogo.src = 'logo.png';
 const globalQr = new Image(); globalQr.src = 'qr.png';
 
-// ลิงก์ Google Sheets เดิมของคุณ
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQaYhTGhkPtCm2XIsiiFTdaft7WsLzcH7-Bfk_hYyPsQn-gARm2lbGApZYEf71wdDDbQXP93cTNpZC/pub?output=csv'; 
 
 let products = [];
@@ -146,17 +145,15 @@ document.getElementById('clearCart').onclick = () => { if(confirm("ล้าง�
 document.getElementById('savePrice').onclick = () => genBill(true);
 document.getElementById('saveNoPrice').onclick = () => genBill(false);
 
-// --- ฟังก์ชันสร้างใบเสร็จ (แก้ไขแล้ว) ---
 function genBill(showPrice) {
     if(cart.length===0) return;
     const cvs = document.getElementById('billCanvas'); const ctx = cvs.getContext('2d');
     const W = 600, P = 30;
-    // ✅ เพิ่มความสูงบรรทัด (จาก 35 เป็น 40) เพราะตัวหนังสือใหญ่ขึ้น
     const LH = 40; 
     const items = cart.filter(i => showPrice || i.category !== 'invisible');
     
-    // ✅ ลดพื้นที่ด้านล่าง (จาก +600 เหลือ +480)
-    cvs.width = W; cvs.height = 220 + (items.length * LH) + 480;
+    // ✅ ลดพื้นที่ด้านล่างจาก 480 เหลือ 460
+    cvs.width = W; cvs.height = 220 + (items.length * LH) + 460;
     
     ctx.fillStyle = "white"; ctx.fillRect(0,0,cvs.width,cvs.height);
     let y = 30;
@@ -168,13 +165,11 @@ function genBill(showPrice) {
     ctx.fillStyle="black"; ctx.font="bold 26px sans-serif"; ctx.textAlign="center";
     ctx.fillText("ป๊อกล้อซิ่งพระราม 3 by POK", W/2, y); y+=30;
     
-    // ✅ เพิ่มขนาดฟอนต์วันที่ (จาก 14 เป็น 16)
     ctx.font="16px sans-serif"; ctx.fillStyle="#555";
-    ctx.fillText(`วันที่: ${new Date().toLocaleString('th-TH')}`, W/2, y); y+=25; // เพิ่มระยะห่างนิดนึง
+    ctx.fillText(`วันที่: ${new Date().toLocaleString('th-TH')}`, W/2, y); y+=25;
     
     ctx.beginPath(); ctx.moveTo(P, y); ctx.lineTo(W-P, y); ctx.strokeStyle="#ddd"; ctx.stroke(); y+=35;
 
-    // ✅ เพิ่มขนาดฟอนต์รายการสินค้า (จาก 18 เป็น 20)
     ctx.font="20px sans-serif"; 
     items.forEach(i => {
         ctx.textAlign="left"; ctx.fillStyle="black";
@@ -194,17 +189,14 @@ function genBill(showPrice) {
     ctx.font="bold 30px sans-serif"; ctx.fillStyle="#007bff"; ctx.textAlign="right";
     ctx.fillText(`ยอดสุทธิ: ${total.toLocaleString()} บาท`, W-P, y); y+=50;
 
-    // ✅ เพิ่มขนาดและทำตัวหนาให้ชื่อธนาคาร
     ctx.font="bold 18px sans-serif"; ctx.fillStyle="#333"; ctx.textAlign="center";
     ctx.fillText("ธนาคารกสิกรไทย (KBANK)", W/2, y); y+=30;
     
-    // ✅ เพิ่มขนาดเลขบัญชี
     ctx.font="bold 24px sans-serif"; 
     ctx.fillText("077-3-90831-1", W/2, y); y+=30;
     
-    // ✅ เพิ่มขนาดชื่อบัญชี
     ctx.font="18px sans-serif"; 
-    ctx.fillText("นายประกาศิต ยืนยั่ง", W/2, y); y+=40; // ลดระยะห่างก่อนถึง QR Code
+    ctx.fillText("นายประกาศิต ยืนยั่ง", W/2, y); y+=40;
 
     if(globalQr.complete) ctx.drawImage(globalQr, (W-250)/2, y, 250, 250);
     
