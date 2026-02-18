@@ -10,11 +10,11 @@
       margin: 0; padding: 0; 
       background-color: #f0f2f5; 
       font-family: 'Sarabun', sans-serif; 
-      height: 100vh; /* ความสูงเต็มจอ 100% */
+      height: 100vh; /* เต็มจอ */
       width: 100vw;
       display: flex;
       flex-direction: column;
-      overflow: hidden; /* ห้ามสกรอลหน้าหลัก */
+      overflow: hidden; 
     }
 
     .container { 
@@ -40,31 +40,30 @@
         gap: 5px; 
       }
       
-      /* กล่องรายการสินค้า (บน) */
+      /* กล่องรายการสินค้า (บน) - ลดความสูงลง */
       .left-panel { 
         flex: none; 
-        height: 55%; /* กินพื้นที่ 55% ของจอ */
+        height: 40%; /* 🔻 ลดจาก 55% เหลือ 40% (รายการจะสั้นลง) */
         border-radius: 8px 8px 0 0 !important;
         border-bottom: 1px solid #ddd;
       }
       
-      /* กล่องตะกร้า (ล่าง) */
+      /* กล่องตะกร้า (ล่าง) - เพิ่มพื้นที่ให้ */
       .right-panel { 
         flex: none; 
-        height: 45%; /* กินพื้นที่ 45% ที่เหลือ (เพื่อให้เห็นปุ่มครบ) */
+        height: 60%; /* 🔺 เพิ่มจาก 45% เป็น 60% (ปุ่มจะได้ไม่เบียด) */
         border-radius: 0 0 8px 8px !important;
         border-top: 2px solid #007bff;
         display: flex;
         flex-direction: column;
       }
 
-      /* ปรับขนาดให้เหมาะกับมือถือ */
-      .cart-items { flex: 1; } /* ให้ส่วนรายการยืดหดได้ */
-      .btn-qty, .btn-trash { width: 30px; height: 30px; font-size: 14px; }
+      /* ปรับขนาด */
+      .cart-items { flex: 1; } 
+      .btn-qty, .btn-trash { width: 32px; height: 32px; font-size: 14px; }
       .product-row { padding: 10px; font-size: 14px; }
       .total-price { font-size: 20px; margin-bottom: 2px; }
       
-      /* ปรับปุ่มล่างสุดให้ตัวหนังสือเล็กนิดนึงจะได้ไม่ล้น */
       .btn-save-bill { padding: 8px; font-size: 13px; }
       .btn-bill { font-size: 11px; padding: 5px; } 
       .action-group { height: 35px; }
@@ -127,7 +126,7 @@
   <div class="left-panel">
     <div class="tabs">
         <button id="tabProductBtn" class="tab-btn active">📦 สินค้า</button>
-        <button id="tabSavedBtn" class="tab-btn">💾 บิลที่บันทึกไว้</button>
+        <button id="tabSavedBtn" class="tab-btn">💾 บิลเก่า</button>
     </div>
 
     <div id="tabProductContent" class="tab-content active">
