@@ -69,7 +69,6 @@ function setupSearchFeatures() {
 
     input.addEventListener('input', (e) => {
         displayProducts(e.target.value);
-        clearBtn.style.display = e.target.value.length > 0 ? 'block' : 'none';
     });
 
     clearBtn.addEventListener('click', () => {
