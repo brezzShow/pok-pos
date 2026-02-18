@@ -52,16 +52,17 @@ document.getElementById('btnLogout').onclick = () => {
     }
 };
 
-// --- ฟังก์ชันค้นหา (แก้กดซ้ำเพื่อ Toggle) ---
+// --- ฟังก์ชันค้นหา & Dropdown (แก้ใหม่ตามสั่ง) ---
 function setupSearchFeatures() {
     const input = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearSearch');
     const suggestions = document.getElementById('customSuggestions');
     const options = suggestions.querySelectorAll('li');
 
-    // ✅ คลิกที่ช่อง: ถ้าเปิดอยู่ให้ปิด ถ้าปิดอยู่ให้เปิด (Toggle)
+    // 1. กดที่ช่อง input เพื่อ เปิด/ปิด Dropdown
     input.addEventListener('click', (e) => {
-        e.stopPropagation(); // กันไม่ให้ไปชนกับ event ของ document
+        e.stopPropagation(); // กันไม่ให้ไปตีกับ event ปิด
+        // สลับเปิดปิด
         if (suggestions.style.display === 'block') {
             suggestions.style.display = 'none';
         } else {
@@ -69,12 +70,53 @@ function setupSearchFeatures() {
         }
     });
 
-    // คลิกที่อื่นในจอเพื่อปิด
+    // 2. พิมพ์ข้อความ
+    input.addEventListener('input', (e) => {
+        displayProducts(e.target.value);
+        
+        // ✅ ถ้ามีข้อความให้โชว์ปุ่ม X ถ้าไม่มีให้ซ่อน
+        if (e.target.value.length > 0) {
+            clearBtn.style.display = 'block';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+
+        // ตอนพิมพ์ให้ซ่อน Dropdown ไปก่อน (เพื่อให้เห็นผลลัพธ์สินค้า)
+        suggestions.style.display = 'none';
+    });
+
+    // 3. ✅ ปุ่ม X (พระเอกของงานนี้)
+    clearBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // ⛔ สำคัญมาก: ห้ามให้ event ทะลุไปปิด Dropdown
+        
+        input.value = "";       // 1. ลบข้อความ
+        displayProducts("");    // 2. รีเซ็ตรายการสินค้า
+        input.focus();          // 3. เอาเคอร์เซอร์ไปวางใหม่
+        
+        // 4. ✅ สั่งเปิด Dropdown ทันที! (ไม่ให้ยุบหาย)
+        suggestions.style.display = 'block'; 
+        
+        // 5. ซ่อนปุ่ม X เพราะไม่มีข้อความแล้ว
+        clearBtn.style.display = 'none';
+    });
+
+    // 4. เลือกคำจาก Dropdown
+    options.forEach(opt => {
+        opt.addEventListener('click', () => {
+            input.value = opt.innerText;
+            displayProducts(opt.innerText);
+            suggestions.style.display = 'none'; // เลือกเสร็จปิด Dropdown
+            clearBtn.style.display = 'block';   // โชว์ปุ่ม X เพราะมีข้อความแล้ว
+        });
+    });
+
+    // 5. คลิกที่อื่นในจอเพื่อปิด Dropdown
     document.addEventListener('click', (e) => {
-        if (e.target !== input && e.target !== suggestions) {
+        if (e.target !== input && e.target !== suggestions && e.target !== clearBtn) {
             suggestions.style.display = 'none';
         }
     });
+};
 
     input.addEventListener('input', (e) => {
         displayProducts(e.target.value);
