@@ -24,7 +24,7 @@
       backdrop-filter: blur(8px);
     }
     .login-box {
-      background: white; padding: 30px 20px; border-radius: 16px;
+      background: white; padding: 30px 20px; border-radius: 12px;
       width: 85%; max-width: 320px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.6);
       text-align: center;
@@ -47,14 +47,11 @@
     }
     .remember-me input { margin-right: 8px; width: 18px; height: 18px; }
 
-    /* --- ปุ่ม Logout (ปรับขนาดให้เล็กและแคบลง) --- */
+    /* --- ปุ่ม Logout --- */
     .btn-logout {
       background: #dc3545; color: white; border: none; border-radius: 4px;
-      padding: 0 8px; /* ลดความกว้าง */
-      font-size: 11px; /* ลดขนาดตัวหนังสือ */
-      cursor: pointer; height: 38px;
-      margin-left: 5px; font-weight: bold; flex-shrink: 0;
-      min-width: 50px; /* กำหนดความกว้างขั้นต่ำ */
+      padding: 0 8px; font-size: 11px; cursor: pointer; height: 38px;
+      margin-left: 5px; font-weight: bold; flex-shrink: 0; min-width: 50px;
     }
 
     /* --- ช่องค้นหา --- */
@@ -71,12 +68,11 @@
       font-size: 16px; color: #bbb; cursor: pointer;
       width: 24px; height: 24px; line-height: 24px; text-align: center;
       border-radius: 50%; background: #f0f0f0; 
-      display: none; /* ซ่อนไว้ก่อน ถ้าไม่มีข้อความ */
-      font-weight: bold;
+      display: none; font-weight: bold;
     }
     #clearSearch:hover { background: #ddd; color: #555; }
 
-    /* Custom Dropdown */
+    /* Dropdown */
     .suggestions-list {
       position: absolute; top: 100%; left: 0; width: 100%;
       background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px;
@@ -91,33 +87,25 @@
     .suggestions-list li:hover { background: #e3f2fd; color: #007bff; }
     .suggestions-list li:last-child { border-bottom: none; }
 
-    /* --- Layout Container --- */
+    /* --- Layout --- */
     .container { 
       display: flex; height: 100%; gap: 10px; padding: 10px;
       box-sizing: border-box; overflow: hidden;
     }
 
-    /* --- Media Query (คอมพิวเตอร์) --- */
     @media (min-width: 769px) { .left-panel { flex: 1.4; } .right-panel { flex: 1.1; } }
 
-    /* --- Media Query (มือถือ - แก้สัดส่วน 55:45) --- */
+    /* มือถือ: สัดส่วน 55:45 */
     @media (max-width: 768px) {
       .container { flex-direction: column; padding: 5px; gap: 5px !important; }
-      
-      /* ✅ สินค้า 55% */
       .left-panel { 
-        flex: none; 
-        height: 55%; 
+        flex: none; height: 55%; 
         border-radius: 8px 8px 0 0 !important; border-bottom: none !important; 
       }
-      
-      /* ✅ ตะกร้า 45% */
       .right-panel { 
-        flex: none; 
-        height: calc(45% - 5px); 
+        flex: none; height: calc(45% - 5px); 
         border-radius: 0 0 8px 8px !important; border-top: 1px solid #ddd !important; 
       }
-      
       .cart-items { flex: 1; min-height: 0; }
       .footer-section { padding-bottom: 10px !important; }
       
@@ -130,16 +118,14 @@
       .action-group { height: 38px; }
     }
 
-    /* --- Common Styles --- */
+    /* --- Common --- */
     .left-panel, .right-panel { display: flex; flex-direction: column; background: white; border-radius: 8px; border: 1px solid #ddd; overflow: hidden; }
     .tabs { display: flex; background: #eee; border-bottom: 1px solid #ddd; flex-shrink: 0; }
     .tab-btn { flex: 1; padding: 12px; border: none; font-weight: bold; color: #666; background: #eee; outline: none; }
     .tab-btn.active { background: #007bff; color: white; }
     .tab-content { flex: 1; display: none; flex-direction: column; padding: 5px; overflow: hidden; }
     .tab-content.active { display: flex; }
-    
     .tools-bar { display: flex; gap: 5px; margin-bottom: 5px; flex-shrink: 0; align-items: center; z-index: 10; position: relative; }
-    
     .scroll-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; border: 1px solid #eee; }
     .product-row { border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; }
     .product-row:active { background-color: #e3f2fd; }
@@ -150,7 +136,6 @@
     .cart-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
     .qty-group { display: flex; align-items: center; gap: 3px; }
     .btn-qty { border: 1px solid #bbb; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
-    /* ✅ ใช้ Class นี้สำหรับปุ่มถังขยะ */
     .btn-trash { background: #dc3545; color: white; border: none; border-radius: 4px; margin-left: 3px; display: flex; align-items: center; justify-content: center; }
     .footer-section { padding: 5px 8px 8px 8px; border-top: 1px solid #ddd; background: #fff; flex-shrink: 0; }
     .total-price { text-align: right; font-size: 24px; font-weight: bold; color: #28a745; margin-bottom: 5px; }
