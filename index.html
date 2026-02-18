@@ -10,61 +10,67 @@
       margin: 0; padding: 0; 
       background-color: #f0f2f5; 
       font-family: 'Sarabun', sans-serif; 
-      height: 100vh; /* เต็มจอ */
+      height: 100vh; /* ความสูงเต็มจอ 100% */
       width: 100vw;
       display: flex;
       flex-direction: column;
-      overflow: hidden; /* ห้ามสกรอลตัว body */
+      overflow: hidden; /* ห้ามสกรอลหน้าหลัก */
     }
 
     .container { 
       display: flex; 
-      flex: 1; /* ยืดเต็มพื้นที่ที่เหลือ */
+      flex: 1; 
       gap: 10px; 
       padding: 10px;
-      overflow: hidden; /* ห้ามสกรอลคอนเทนเนอร์หลัก */
+      overflow: hidden; 
       box-sizing: border-box;
     }
 
-    /* --- สไตล์สำหรับคอมพิวเตอร์ (จอใหญ่) --- */
+    /* --- จอคอมพิวเตอร์ (แนวนอน) --- */
     @media (min-width: 769px) {
       .left-panel { flex: 1.4; }
       .right-panel { flex: 1.1; }
     }
 
-    /* --- สไตล์สำหรับมือถือ (จอเล็ก) --- */
+    /* --- จอมือถือ (แนวตั้ง) --- */
     @media (max-width: 768px) {
       .container { 
-        flex-direction: column; /* เรียงลงแนวตั้ง */
+        flex-direction: column; 
         padding: 5px;
-        gap: 0; /* ติดกันเลยประหยัดที่ */
+        gap: 5px; 
       }
       
+      /* กล่องรายการสินค้า (บน) */
       .left-panel { 
         flex: none; 
-        height: 55%; /* รายการสินค้าเอาไป 55% ของจอ */
+        height: 55%; /* กินพื้นที่ 55% ของจอ */
         border-radius: 8px 8px 0 0 !important;
         border-bottom: 1px solid #ddd;
       }
       
+      /* กล่องตะกร้า (ล่าง) */
       .right-panel { 
         flex: none; 
-        height: 45%; /* ตะกร้าเอาไป 45% ของจอ (เพื่อให้เห็นปุ่มครบ) */
+        height: 45%; /* กินพื้นที่ 45% ที่เหลือ (เพื่อให้เห็นปุ่มครบ) */
         border-radius: 0 0 8px 8px !important;
         border-top: 2px solid #007bff;
+        display: flex;
+        flex-direction: column;
       }
 
-      /* ปรับขนาดตัวอักษรและปุ่มในมือถือ */
-      .btn-qty, .btn-trash { width: 32px; height: 32px; font-size: 14px; }
+      /* ปรับขนาดให้เหมาะกับมือถือ */
+      .cart-items { flex: 1; } /* ให้ส่วนรายการยืดหดได้ */
+      .btn-qty, .btn-trash { width: 30px; height: 30px; font-size: 14px; }
       .product-row { padding: 10px; font-size: 14px; }
-      .cart-header { padding: 5px 10px; font-size: 14px; }
       .total-price { font-size: 20px; margin-bottom: 2px; }
-      .btn-save-bill { padding: 8px; font-size: 14px; }
-      .btn-bill { font-size: 12px; padding: 8px; }
-      .action-group { height: 38px; }
+      
+      /* ปรับปุ่มล่างสุดให้ตัวหนังสือเล็กนิดนึงจะได้ไม่ล้น */
+      .btn-save-bill { padding: 8px; font-size: 13px; }
+      .btn-bill { font-size: 11px; padding: 5px; } 
+      .action-group { height: 35px; }
     }
 
-    /* --- ดีไซน์กล่อง --- */
+    /* --- ดีไซน์ทั่วไป --- */
     .left-panel, .right-panel {
       display: flex; 
       flex-direction: column; 
@@ -74,7 +80,6 @@
       overflow: hidden;
     }
 
-    /* Tabs & Tools */
     .tabs { display: flex; background: #eee; border-bottom: 1px solid #ddd; flex-shrink: 0; }
     .tab-btn { flex: 1; padding: 10px; border: none; font-weight: bold; color: #666; background: #eee; outline: none; }
     .tab-btn.active { background: #007bff; color: white; }
@@ -84,35 +89,31 @@
     
     .tools-bar { display: flex; gap: 5px; margin-bottom: 5px; flex-shrink: 0; }
     .search-box { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
-    .btn-csv { background: #607d8b; color: white; border: none; border-radius: 4px; padding: 0 10px; font-size: 12px;}
+    .btn-csv { background: #607d8b; color: white; border: none; border-radius: 4px; padding: 0 10px; font-size: 12px; }
 
-    /* Lists */
     .scroll-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; border: 1px solid #eee; }
     .product-row { border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; padding: 10px; cursor: pointer; }
     .product-row:active { background-color: #e3f2fd; }
-
     .saved-bill-row { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
 
-    /* Cart */
     .cart-header { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 2px solid #333; flex-shrink: 0; background: #fff; }
     .cart-items { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fafafa; padding: 5px; }
     .cart-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 5px 0; background: white; margin-bottom: 2px; }
-    
     .cart-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
     .qty-group { display: flex; align-items: center; gap: 3px; }
     .btn-qty { border: 1px solid #bbb; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
     .btn-trash { background: #dc3545; color: white; border: none; border-radius: 4px; margin-left: 3px; display: flex; align-items: center; justify-content: center; }
 
-    /* Footer Buttons */
     .footer-section { padding: 5px 8px 8px 8px; border-top: 1px solid #ddd; background: #fff; flex-shrink: 0; }
     .total-price { text-align: right; font-size: 24px; font-weight: bold; color: #28a745; margin-bottom: 5px; }
+    
     .btn-save-bill { width: 100%; background: #6f42c1; color: white; padding: 8px; border: none; border-radius: 4px; margin-bottom: 5px; font-size: 14px; font-weight: bold; }
     
     .action-group { display: flex; gap: 5px; height: 40px; }
     .btn-bill { flex: 1; border: none; border-radius: 4px; color: white; font-weight: bold; font-size: 13px; }
     .btn-price { background: #007bff; }
     .btn-noprice { background: #fd7e14; }
-    .btn-clear-all { width: 40px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 16px; display: flex; align-items: center; justify-content: center;}
+    .btn-clear-all { width: 40px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 16px; display: flex; align-items: center; justify-content: center; }
 
     /* Utilities */
     .btn-action-sm { padding: 5px 10px; border: none; border-radius: 4px; color: white; font-size: 12px; margin-left: 3px; }
@@ -132,6 +133,9 @@
     <div id="tabProductContent" class="tab-content active">
         <div class="tools-bar">
             <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหา...">
+            <button id="btnExport" class="btn-csv">Exp</button>
+            <button id="btnImport" class="btn-csv">Imp</button>
+            <input type="file" id="csvInput" accept=".csv">
         </div>
         <div id="itemList" class="scroll-list"></div>
     </div>
