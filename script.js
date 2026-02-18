@@ -1,6 +1,7 @@
 const globalLogo = new Image(); globalLogo.src = 'logo.png';
 const globalQr = new Image(); globalQr.src = 'qr.png';
 
+// ลิงก์ Google Sheets เดิม
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQaYhTGhkPtCm2XIsiiFTdaft7WsLzcH7-Bfk_hYyPsQn-gARm2lbGApZYEf71wdDDbQXP93cTNpZC/pub?output=csv'; 
 
 let products = [];
@@ -152,8 +153,8 @@ function genBill(showPrice) {
     const LH = 40; 
     const items = cart.filter(i => showPrice || i.category !== 'invisible');
     
-    // ✅ ลดพื้นที่ด้านล่างจาก 480 เหลือ 460
-    cvs.width = W; cvs.height = 220 + (items.length * LH) + 460;
+    // ✅ ลดพื้นที่ด้านล่างลงอีก 50px (จาก 480 เหลือ 430)
+    cvs.width = W; cvs.height = 220 + (items.length * LH) + 430;
     
     ctx.fillStyle = "white"; ctx.fillRect(0,0,cvs.width,cvs.height);
     let y = 30;
