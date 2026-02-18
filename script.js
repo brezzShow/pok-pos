@@ -3,7 +3,7 @@ const globalQr = new Image(); globalQr.src = 'qr.png';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQaYhTGhkPtCm2XIsiiFTdaft7WsLzcH7-Bfk_hYyPsQn-gARm2lbGApZYEf71wdDDbQXP93cTNpZC/pub?output=csv'; 
 
-// --- ตั้งค่ารหัสผ่านตรงนี้ ---
+// ✅ ข้อมูลล็อกอิน (Trim เพื่อความชัวร์)
 const USER = "pokuser";
 const PASS = "pok@rama3Shop";
 
@@ -12,54 +12,71 @@ let cart = [];
 let savedBills = JSON.parse(localStorage.getItem('savedBills')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    checkLogin(); // ✅ เช็คการล็อกอินก่อน
+    checkLogin();
     loadProductsFromSheet();
     renderSavedBills();
     setupTabs();
-    setupSearchFeatures(); // ✅ ฟังก์ชันช่องค้นหาใหม่
+    setupSearchFeatures();
 });
 
 // --- ระบบล็อกอิน ---
 function checkLogin() {
     const isLogged = localStorage.getItem('pok_isLogged');
+    // ถ้าเคยล็อกอินและกดจำไว้ -> ผ่านเลย
     if (isLogged === 'true') {
         document.getElementById('loginOverlay').style.display = 'none';
     } else {
         document.getElementById('loginOverlay').style.display = 'flex';
+        // เคลียร์ช่องกรอกเพื่อความปลอดภัย
+        document.getElementById('loginUser').value = '';
+        document.getElementById('loginPass').value = '';
     }
 }
 
 document.getElementById('btnLogin').onclick = () => {
-    const u = document.getElementById('loginUser').value;
-    const p = document.getElementById('loginPass').value;
+    // .trim() ช่วยตัดช่องว่างหน้าหลังออกกันพลาด
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value.trim();
     const remember = document.getElementById('rememberMe').checked;
 
     if (u === USER && p === PASS) {
         if (remember) {
             localStorage.setItem('pok_isLogged', 'true');
+        } else {
+            // ถ้าไม่จำ ให้เก็บแบบชั่วคราว (session) หรือไม่เก็บเลยก็ได้
+            // ในที่นี้ถ้าไม่จำ พอรีเฟรชก็ต้องเข้าใหม่
+            localStorage.removeItem('pok_isLogged'); 
         }
         document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('loginError').style.display = 'none';
     } else {
         document.getElementById('loginError').style.display = 'block';
     }
 };
 
-// --- ฟังก์ชันช่องค้นหา (Dropdown + Clear Button) ---
+// --- ปุ่ม Logout ---
+document.getElementById('btnLogout').onclick = () => {
+    if(confirm('ต้องการออกจากระบบ?')) {
+        localStorage.removeItem('pok_isLogged'); // ลบสถานะล็อกอิน
+        location.reload(); // รีเฟรชหน้าเว็บเพื่อกลับไปหน้าล็อกอิน
+    }
+};
+
+// --- ฟังก์ชันค้นหา ---
 function setupSearchFeatures() {
     const input = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearSearch');
 
     input.addEventListener('input', (e) => {
         displayProducts(e.target.value);
-        // แสดงปุ่มลบ ถ้ามีข้อความ
         clearBtn.style.display = e.target.value.length > 0 ? 'block' : 'none';
     });
 
     clearBtn.addEventListener('click', () => {
-        input.value = ""; // ล้างค่า
-        clearBtn.style.display = 'none'; // ซ่อนปุ่ม
-        displayProducts(""); // แสดงสินค้าทั้งหมด
-        input.focus(); // เอาเคอร์เซอร์กลับไปวาง
+        input.value = "";
+        clearBtn.style.display = 'none';
+        displayProducts("");
+        input.focus();
     });
 }
 
