@@ -30,27 +30,29 @@
       .right-panel { flex: 1.1; }
     }
 
-    /* --- จอมือถือ (จุดที่แก้ไข) --- */
+    /* --- จอมือถือ (แก้ไขตรงนี้ครับ) --- */
     @media (max-width: 768px) {
       .container { 
         flex-direction: column; 
         padding: 5px;
-        /* ✅ 1. เพิ่ม gap 5px ตามที่ขอ */
-        gap: 5px !important; 
+        /* ✅ เพิ่มช่องว่าง 5px */
+        gap: 5px; 
       }
       
       .left-panel { 
         flex: none; 
         height: 38%; 
-        border-radius: 8px 8px 0 0 !important;
-        border-bottom: none !important;
+        /* ปรับให้มนทุกมุม เพราะแยกกล่องกันแล้ว */
+        border-radius: 8px !important; 
+        border-bottom: 1px solid #ddd !important;
       }
       
       .right-panel { 
         flex: none; 
-        /* ✅ 2. ปรับความสูงโดยลบ 5px ออก เพื่อชดเชยกับ gap ที่เพิ่มมา (ปุ่มจะได้ไม่หาย) */
+        /* ✅ คำนวณความสูงใหม่ (62% ลบออก 5px ที่เป็นช่องว่าง) ไม่งั้นจอเกิน */
         height: calc(62% - 5px); 
-        border-radius: 0 0 8px 8px !important;
+        /* ปรับให้มนทุกมุม */
+        border-radius: 8px !important; 
         border-top: 1px solid #ddd !important; 
       }
 
