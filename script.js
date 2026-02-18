@@ -3,15 +3,65 @@ const globalQr = new Image(); globalQr.src = 'qr.png';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQQaYhTGhkPtCm2XIsiiFTdaft7WsLzcH7-Bfk_hYyPsQn-gARm2lbGApZYEf71wdDDbQXP93cTNpZC/pub?output=csv'; 
 
+// --- ตั้งค่ารหัสผ่านตรงนี้ ---
+const USER = "pokuser";
+const PASS = "pok@rama3Shop";
+
 let products = [];
 let cart = [];
 let savedBills = JSON.parse(localStorage.getItem('savedBills')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
+    checkLogin(); // ✅ เช็คการล็อกอินก่อน
     loadProductsFromSheet();
     renderSavedBills();
     setupTabs();
+    setupSearchFeatures(); // ✅ ฟังก์ชันช่องค้นหาใหม่
 });
+
+// --- ระบบล็อกอิน ---
+function checkLogin() {
+    const isLogged = localStorage.getItem('pok_isLogged');
+    if (isLogged === 'true') {
+        document.getElementById('loginOverlay').style.display = 'none';
+    } else {
+        document.getElementById('loginOverlay').style.display = 'flex';
+    }
+}
+
+document.getElementById('btnLogin').onclick = () => {
+    const u = document.getElementById('loginUser').value;
+    const p = document.getElementById('loginPass').value;
+    const remember = document.getElementById('rememberMe').checked;
+
+    if (u === USER && p === PASS) {
+        if (remember) {
+            localStorage.setItem('pok_isLogged', 'true');
+        }
+        document.getElementById('loginOverlay').style.display = 'none';
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+    }
+};
+
+// --- ฟังก์ชันช่องค้นหา (Dropdown + Clear Button) ---
+function setupSearchFeatures() {
+    const input = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearSearch');
+
+    input.addEventListener('input', (e) => {
+        displayProducts(e.target.value);
+        // แสดงปุ่มลบ ถ้ามีข้อความ
+        clearBtn.style.display = e.target.value.length > 0 ? 'block' : 'none';
+    });
+
+    clearBtn.addEventListener('click', () => {
+        input.value = ""; // ล้างค่า
+        clearBtn.style.display = 'none'; // ซ่อนปุ่ม
+        displayProducts(""); // แสดงสินค้าทั้งหมด
+        input.focus(); // เอาเคอร์เซอร์กลับไปวาง
+    });
+}
 
 function loadProductsFromSheet() {
     const listDiv = document.getElementById('itemList');
@@ -140,7 +190,6 @@ function renderSavedBills() {
 window.loadBill = (i) => { cart = JSON.parse(JSON.stringify(savedBills[i].items)); renderCart(); };
 window.delBill = (i) => { if(confirm("ลบ?")) { savedBills.splice(i,1); localStorage.setItem('savedBills', JSON.stringify(savedBills)); renderSavedBills(); }};
 
-document.getElementById('searchInput').oninput = (e) => displayProducts(e.target.value);
 document.getElementById('clearCart').onclick = () => { if(confirm("ล้างตะกร้า?")) { cart=[]; renderCart(); }};
 document.getElementById('savePrice').onclick = () => genBill(true);
 document.getElementById('saveNoPrice').onclick = () => genBill(false);
@@ -152,7 +201,6 @@ function genBill(showPrice) {
     const LH = 40; 
     const items = cart.filter(i => showPrice || i.category !== 'invisible');
     
-    // ✅ 1. เพิ่มพื้นที่ด้านล่าง (จาก 460 เป็น 520) ให้ดูพอดีๆ
     cvs.width = W; cvs.height = 220 + (items.length * LH) + 520;
     
     ctx.fillStyle = "white"; ctx.fillRect(0,0,cvs.width,cvs.height);
@@ -201,10 +249,9 @@ function genBill(showPrice) {
     const qrSize = 250;
     const qrX = (W - qrSize) / 2;
 
-    // ✅ 2. เพิ่มเส้นขอบให้ QR Code
-    ctx.strokeStyle = "#000"; // สีขอบดำ
-    ctx.lineWidth = 2;        // ความหนาเส้นขอบ
-    ctx.strokeRect(qrX, y, qrSize, qrSize); // วาดสี่เหลี่ยม
+    ctx.strokeStyle = "#000"; 
+    ctx.lineWidth = 2;        
+    ctx.strokeRect(qrX, y, qrSize, qrSize); 
 
     if(globalQr.complete) {
         ctx.drawImage(globalQr, qrX, y, qrSize, qrSize);
