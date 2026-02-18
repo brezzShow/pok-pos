@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>POK POS</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #f0f2f5; font-family: 'Sarabun', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    .container { display: flex; flex: 1; gap: 10px; padding: 10px; overflow: hidden; }
+    
+    /* จอมือถือ */
+    @media (max-width: 768px) {
+      .container { flex-direction: column; padding: 5px; gap: 5px; }
+      .left-panel { flex: 1; min-height: 0; }
+      .right-panel { flex: 1; min-height: 0; border-top: 4px solid #007bff; }
+      .btn-qty, .btn-trash { width: 35px; height: 35px; font-size: 16px; }
+      .product-row { padding: 15px 10px; font-size: 14px; }
+    }
+    
+    /* จอคอม */
+    @media (min-width: 769px) {
+      .left-panel { flex: 1.3; } .right-panel { flex: 1.1; }
+    }
+
+    .left-panel, .right-panel { display: flex; flex-direction: column; background: white; border-radius: 8px; border: 1px solid #ddd; overflow: hidden; }
+    .tabs { display: flex; background: #eee; border-bottom: 1px solid #ddd; flex-shrink: 0; }
+    .tab-btn { flex: 1; padding: 12px; border: none; font-weight: bold; color: #666; background: #eee; outline: none; }
+    .tab-btn.active { background: #007bff; color: white; }
+    .tab-content { flex: 1; display: none; flex-direction: column; padding: 8px; overflow: hidden; }
+    .tab-content.active { display: flex; }
+    .tools-bar { display: flex; gap: 5px; margin-bottom: 8px; flex-shrink: 0; }
+    .search-box { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+    .scroll-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; border: 1px solid #eee; }
+    .product-row, .saved-bill-row { border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer; }
+    .product-row:active { background-color: #e3f2fd; }
+    
+    .cart-header { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 2px solid #333; flex-shrink: 0; background: #fff; }
+    .cart-items { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fafafa; padding: 5px; }
+    .cart-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 8px 0; background: white; margin-bottom: 2px; }
+    .cart-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+    .qty-group { display: flex; align-items: center; gap: 5px; }
+    .btn-qty { border: 1px solid #bbb; background: white; border-radius: 4px; }
+    .btn-trash { background: #dc3545; color: white; border: none; border-radius: 4px; margin-left: 5px; }
+    
+    .footer-section { padding: 8px; border-top: 1px solid #ddd; background: #fff; flex-shrink: 0; }
+    .total-price { text-align: right; font-size: 24px; font-weight: bold; color: #28a745; margin-bottom: 5px; }
+    .btn-save-bill { width: 100%; background: #6f42c1; color: white; padding: 10px; border: none; border-radius: 4px; margin-bottom: 5px; font-size: 14px; font-weight: bold; }
+    .action-group { display: flex; gap: 5px; height: 45px; }
+    .btn-bill { flex: 1; border: none; border-radius: 4px; color: white; font-weight: bold; font-size: 14px; }
+    .btn-price { background: #007bff; } .btn-noprice { background: #fd7e14; }
+    .btn-clear-all { width: 45px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 18px; }
+    .btn-action-sm { padding: 6px 12px; border: none; border-radius: 4px; color: white; font-size: 12px; margin-left: 3px; }
+    .btn-load { background: #28a745; } .btn-del { background: #dc3545; }
+    #billCanvas { display: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="left-panel">
+    <div class="tabs">
+        <button id="tabProductBtn" class="tab-btn active">📦 สินค้า</button>
+        <button id="tabSavedBtn" class="tab-btn">💾 บิลเก่า</button>
+    </div>
+    <div id="tabProductContent" class="tab-content active">
+        <div class="tools-bar">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหา...">
+        </div>
+        <div id="itemList" class="scroll-list"></div>
+    </div>
+    <div id="tabSavedContent" class="tab-content">
+        <div id="savedBillList" class="scroll-list"><div style="text-align:center; color:#999; margin-top:20px;">ไม่มีบิล</div></div>
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="cart-header">
+        <span style="font-weight:bold; font-size:16px;">🛒 ตะกร้า</span>
+        <img src="logo.png" style="height:30px; display:none;" onload="this.style.display='block'">
+    </div>
+    <div id="cartContents" class="cart-items"><div style="text-align:center; color:#999; margin-top:30px;">ว่างเปล่า</div></div>
+    <div class="footer-section">
+        <div id="totalPrice" class="total-price">0.-</div>
+        <button id="btnSaveOrder" class="btn-save-bill">บันทึกบิล</button>
+        <div class="action-group">
+            <button id="savePrice" class="btn-bill btn-price">บิลเต็ม</button>
+            <button id="saveNoPrice" class="btn-bill btn-noprice">บิลย่อ</button>
+            <button id="clearCart" class="btn-clear-all">🗑️</button>
+        </div>
+    </div>
+  </div>
+</div>
+<canvas id="billCanvas"></canvas>
+<script src="script.js"></script>
+</body>
+</html>
