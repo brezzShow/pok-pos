@@ -52,7 +52,7 @@ document.getElementById('btnLogout').onclick = () => {
     }
 };
 
-// --- ฟังก์ชันค้นหา (Custom Dropdown) ---
+// --- ฟังก์ชันค้นหา (แก้ไข Logic กด X) ---
 function setupSearchFeatures() {
     const input = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearSearch');
@@ -64,29 +64,32 @@ function setupSearchFeatures() {
         suggestions.style.display = 'block';
     });
 
-    // ซ่อน Dropdown เมื่อคลิกที่อื่น (Delayed เพื่อให้กดรายการทัน)
+    // ซ่อน Dropdown เมื่อคลิกที่อื่น (Delayed)
     input.addEventListener('blur', () => {
         setTimeout(() => { suggestions.style.display = 'none'; }, 200);
     });
 
-    // พิมพ์แล้วกรอง
     input.addEventListener('input', (e) => {
         displayProducts(e.target.value);
+        clearBtn.style.display = e.target.value.length > 0 ? 'block' : 'none';
     });
 
-    // กดปุ่ม X
+    // ✅ กด X แล้วล้างค่า + เรียก Dropdown กลับมา
     clearBtn.addEventListener('click', () => {
         input.value = "";
-        displayProducts("");
-        input.focus();
+        displayProducts(""); // โชว์สินค้าทั้งหมด
+        input.focus(); // โฟกัสกลับที่ช่องพิมพ์
+        suggestions.style.display = 'block'; // บังคับโชว์ Dropdown อีกครั้ง
+        clearBtn.style.display = 'none'; // ซ่อนปุ่ม X เพราะไม่มีข้อความแล้ว
     });
 
-    // กดเลือกรายการใน Dropdown
+    // กดเลือกรายการ
     options.forEach(opt => {
         opt.addEventListener('click', () => {
             input.value = opt.innerText;
             displayProducts(opt.innerText);
             suggestions.style.display = 'none';
+            clearBtn.style.display = 'block'; // โชว์ปุ่ม X
         });
     });
 }
